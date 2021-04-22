@@ -166,13 +166,16 @@ class AgentApiClient:
     def send_message(self, contract_id, text, action_link=None, action_name=None, action_onetime=True,
                      only_doctor=False,
                      only_patient=False, action_deadline=None, is_urgent=False, need_answer=False,
-                     attachments=None, action_big=True):
+                     attachments=None, action_big=True, send_from=None):
         message = {
             "text": text
         }
 
         if action_link:
             message['action_link'] = action_link
+
+        if send_from:
+            message['send_from'] = send_from
 
         if action_name:
             message['action_name'] = action_name
