@@ -36,7 +36,10 @@ class AgentApiClient:
                 raise Exception('status code - {}'.format(result.status_code))
 
             if self.debug:
-                print(self.__gts__(), "Result - {}".format(result.text))
+                if len(result.text) > 400:
+                    print(self.__gts__(), "Result - {}...".format(result.text[:200]))
+                else:
+                    print(self.__gts__(), "Result - {}".format(result.text))
 
             try:
                 return result.json()
