@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1"
+__version__ = "0.1.3"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -146,7 +146,6 @@ class AgentApiClient:
         if record_time:
             data['time'] = record_time
 
-
         return self.__send_request__('/api/agents/records/add', data)
 
     def add_records(self, contract_id, values, record_time=None, params=tuple()):
@@ -169,9 +168,10 @@ class AgentApiClient:
     def send_message(self, contract_id, text, action_link=None, action_name=None, action_onetime=True,
                      only_doctor=False,
                      only_patient=False, action_deadline=None, is_urgent=False, need_answer=False,
-                     attachments=None, action_big=True, send_from=None):
+                     attachments=None, action_big=True, send_from=None, forward_to_doctor=True):
         message = {
-            "text": text
+            "text": text,
+            "forward_to_doctor": forward_to_doctor
         }
 
         if action_link:
@@ -286,3 +286,20 @@ class AgentApiClient:
                                  '8000') + "/api/client/agents/{agent_id}/?action={action}&contract_id={contract_id}&agent_token={agent_token}".format(
             agent_id=self.agent_id, action=action, contract_id=contract_id, agent_token=agent_token
         )
+
+    def get_attachment(self, attachment_id):
+        data = {
+            "api_key": self.api_key,
+            "attachment_id": attachment_id
+        }
+
+        return self.__send_request__('/api/agents/attachment', data)
+
+    def get_image(self, image_id, size):
+        data = {
+            "api_key": self.api_key,
+            "attachment_id": image_id,
+            "size": size
+        }
+
+        return self.__send_request__('/api/agents/image', data)
