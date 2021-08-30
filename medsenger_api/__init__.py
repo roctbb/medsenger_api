@@ -3,10 +3,11 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.3"
+__version__ = "0.1.5"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
+import base64
 import uuid
 from copy import copy
 import requests
@@ -148,20 +149,28 @@ class AgentApiClient:
 
         return self.__send_request__('/api/agents/records/add', data)
 
-    def add_records(self, contract_id, values, record_time=None, params=tuple()):
+    def add_records(self, contract_id, values, record_time=None, params={}):
         data = {"contract_id": contract_id, "api_key": self.api_key, 'values': []}
 
         for record in values:
             record_params = copy(params)
+            files = []
 
-            if len(record) == 2:
-                category_name, value = record
-            else:
-                category_name, value, custom_params = record
-                record_params.update(custom_params)
+            if isinstance(record, list):
+                if len(record) == 2:
+                    category_name, value = record
+                else:
+                    category_name, value, custom_params = record
+                    record_params.update(custom_params)
+            elif isinstance(record, dict):
+                category_name = record['category_name']
+                value = record['value']
+                custom_params = record.get('params', {})
+                files = record.get('files', {})
 
             data['values'].append(
-                {"category_name": category_name, "value": value, "params": record_params, "time": record_time})
+                    {"category_name": category_name, "value": value, "params": files, "params": files, "time": record_time})
+
 
         return self.__send_request__('/api/agents/records/add', data)
 
@@ -286,6 +295,24 @@ class AgentApiClient:
                                  '8000') + "/api/client/agents/{agent_id}/?action={action}&contract_id={contract_id}&agent_token={agent_token}".format(
             agent_id=self.agent_id, action=action, contract_id=contract_id, agent_token=agent_token
         )
+    
+    def download_file(self, *args, **kwargs):
+        return self.get_file(*args, **kwargs)
+    
+    def download_attachment(self, *args, **kwargs):
+        return self.get_attachment(*args, **kwargs)
+    
+    def download_image(self, *args, **kwargs):
+        return self.get_image(*args, **kwargs)
+    
+    def get_file(self, contract_id, file_id):
+        data = {
+            "api_key": self.api_key,
+            "file_id": file_id,
+            "contract_id": contract_id
+        }
+
+        return self.__send_request__('/api/agents/records/file', data)
 
     def get_attachment(self, attachment_id):
         data = {
@@ -303,3 +330,29 @@ class AgentApiClient:
         }
 
         return self.__send_request__('/api/agents/image', data)
+
+def prepare_binary(name, data):
+    import magic
+    type = magic.from_buffer(data, mime=True)
+
+    return {
+        "name": name,
+        "base64": base64.b64encode(data),
+        "type": type
+    }
+
+def prepare_file(filename):
+    import magic
+    import os
+
+    type = magic.from_file(filename, mime=True)
+
+    with open(filename, 'rb') as file:
+        answer = {
+            "name": filename.split(os.sep)[-1],
+            "base64": base64.b64encode(file.read()),
+            "type": type
+        }
+
+    return answer
+
