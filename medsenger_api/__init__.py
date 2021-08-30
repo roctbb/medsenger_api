@@ -133,7 +133,7 @@ class AgentApiClient:
 
         return self.__send_request__('/api/agents/records/addition', data)
 
-    def add_record(self, contract_id, category_name, value, record_time=None, params=None):
+    def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None):
         data = {
             "contract_id": contract_id,
             "api_key": self.api_key,
@@ -146,6 +146,10 @@ class AgentApiClient:
 
         if record_time:
             data['time'] = record_time
+
+        if files:
+            data['files'] = files
+
 
         return self.__send_request__('/api/agents/records/add', data)
 
@@ -166,10 +170,11 @@ class AgentApiClient:
                 category_name = record['category_name']
                 value = record['value']
                 custom_params = record.get('params', {})
+                record_params.update(custom_params)
                 files = record.get('files', {})
 
             data['values'].append(
-                    {"category_name": category_name, "value": value, "params": files, "params": files, "time": record_time})
+                    {"category_name": category_name, "value": value, "params": files, "files": files, "time": record_time})
 
 
         return self.__send_request__('/api/agents/records/add', data)
@@ -337,7 +342,7 @@ def prepare_binary(name, data):
 
     return {
         "name": name,
-        "base64": base64.b64encode(data),
+        "base64": base64.b64encode(data).decode('utf-8'),
         "type": type
     }
 
@@ -350,7 +355,7 @@ def prepare_file(filename):
     with open(filename, 'rb') as file:
         answer = {
             "name": filename.split(os.sep)[-1],
-            "base64": base64.b64encode(file.read()),
+            "base64": base64.b64encode(file.read()).decode('utf-8'),
             "type": type
         }
 
