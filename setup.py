@@ -2,14 +2,14 @@ from setuptools import setup
 
 setup(
     name='medsenger_api',
-    version='0.1.8',
+    version='0.1.9',
     description='Python SDK for Medsenger.AI',
     url='https://github.com/roctbb/medsenger_api',
     author='Rostislav Borodin',
     author_email='borodin@medsenger.ru',
     license='BSD 2-clause',
     packages=['medsenger_api'],
-    install_requires=['requests'],
+    install_requires=['requests', 'python-magic'],
 
     classifiers=[
         'License :: OSI Approved :: BSD License',

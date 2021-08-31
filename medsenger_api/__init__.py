@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -150,7 +150,6 @@ class AgentApiClient:
         if files:
             data['files'] = files
 
-
         return self.__send_request__('/api/agents/records/add', data)
 
     def add_records(self, contract_id, values, record_time=None, params={}):
@@ -174,8 +173,7 @@ class AgentApiClient:
                 files = record.get('files', [])
 
             data['values'].append(
-                    {"category_name": category_name, "value": value, "params": files, "files": files, "time": record_time})
-
+                {"category_name": category_name, "value": value, "params": files, "files": files, "time": record_time})
 
         return self.__send_request__('/api/agents/records/add', data)
 
@@ -222,11 +220,14 @@ class AgentApiClient:
             message['attachments'] = []
 
             for attachment in attachments:
-                message['attachments'].append({
-                    "name": attachment[0],
-                    "type": attachment[1],
-                    "base64": attachment[2],
-                })
+                if isinstance(attachment, (list, tuple)):
+                    message['attachments'].append({
+                        "name": attachment[0],
+                        "type": attachment[1],
+                        "base64": attachment[2],
+                    })
+                elif isinstance(attachment, (dict)):
+                    message['attachments'].append(attachment)
 
         data = {
             "contract_id": contract_id,
@@ -300,16 +301,16 @@ class AgentApiClient:
                                  '8000') + "/api/client/agents/{agent_id}/?action={action}&contract_id={contract_id}&agent_token={agent_token}".format(
             agent_id=self.agent_id, action=action, contract_id=contract_id, agent_token=agent_token
         )
-    
+
     def download_file(self, *args, **kwargs):
         return self.get_file(*args, **kwargs)
-    
+
     def download_attachment(self, *args, **kwargs):
         return self.get_attachment(*args, **kwargs)
-    
+
     def download_image(self, *args, **kwargs):
         return self.get_image(*args, **kwargs)
-    
+
     def get_file(self, contract_id, file_id):
         data = {
             "api_key": self.api_key,
@@ -336,6 +337,7 @@ class AgentApiClient:
 
         return self.__send_request__('/api/agents/image', data)
 
+
 def prepare_binary(name, data):
     import magic
     type = magic.from_buffer(data, mime=True)
@@ -345,6 +347,7 @@ def prepare_binary(name, data):
         "base64": base64.b64encode(data).decode('utf-8'),
         "type": type
     }
+
 
 def prepare_file(filename):
     import magic
@@ -360,4 +363,3 @@ def prepare_file(filename):
         }
 
     return answer
-
