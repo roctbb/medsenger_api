@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -160,7 +160,7 @@ class AgentApiClient:
             record_params = copy(params)
             files = []
 
-            if isinstance(record, list):
+            if isinstance(record, (list, tuple)):
                 if len(record) == 2:
                     category_name, value = record
                 else:
