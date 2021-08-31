@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.10"
+__version__ = "0.1.11"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -173,7 +173,7 @@ class AgentApiClient:
                 files = record.get('files', [])
 
             data['values'].append(
-                {"category_name": category_name, "value": value, "params": params, "files": files, "time": record_time})
+                {"category_name": category_name, "value": value, "params": record_params, "files": files, "time": record_time})
 
         return self.__send_request__('/api/agents/records/add', data)
 
