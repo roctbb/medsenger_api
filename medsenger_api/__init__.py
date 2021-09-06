@@ -176,7 +176,7 @@ class AgentApiClient:
                 files = record.get('files', [])
 
             data['values'].append(
-                {"category_name": category_name, "value": value, "params": params, "files": files, "time": record_time})
+                {"category_name": category_name, "value": value, "params": record_params, "files": files, "time": record_time})
 
         return self.__send_request__('/api/agents/records/add', data)
 
