@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.10"
+__version__ = "0.1.11"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -29,7 +29,10 @@ class AgentApiClient:
         target = self.host + page
         try:
             if self.debug:
-                print(self.__gts__(), "Sending request to {} with params {}".format(target, json_params))
+                if len(str(json_params)) > 400:
+                    print(self.__gts__(), "Sending request to {} with params {}".format(target, str(json_params)[:200]))
+                else:
+                    print(self.__gts__(), "Sending request to {} with params {}".format(target, json_params))
 
             result = requests.post(target, json=json_params)
 

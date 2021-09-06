@@ -13,6 +13,10 @@ class TestApi(TestCase):
     def test_get_records(self):
         print(self.create_client().get_records(CONTRACT_ID, "systolic_pressure"))
 
+    def test_send_message_with_attachments(self):
+        client = self.create_client()
+        client.send_message(contract_id=CONTRACT_ID, text='', attachments=[prepare_file('image_2021-08-30_13-42-19.png')], send_from='patient')
+
     def test_add_record_with_file(self):
         client = self.create_client()
 
