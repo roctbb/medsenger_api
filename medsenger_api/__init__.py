@@ -80,7 +80,7 @@ class AgentApiClient:
             'birthday': ''
         }
 
-    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None, group=False):
+    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None, group=False, return_count=False):
 
         data = {
             "contract_id": contract_id,
@@ -100,6 +100,8 @@ class AgentApiClient:
             data['to'] = time_to
         if group:
             data['last_group'] = True
+        if return_count:
+            data['return_count'] = True
 
         if not category_name:
             url = "/api/agents/records/get/all"
