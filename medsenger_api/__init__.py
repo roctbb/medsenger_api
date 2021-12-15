@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.13"
+__version__ = "0.1.14"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -341,6 +341,14 @@ class AgentApiClient:
         }
 
         return self.__send_request__('/api/agents/image', data)
+
+    def update_cache(self, contract_id):
+        data = {
+            "api_key": self.api_key,
+            "contract_id": contract_id
+        }
+
+        return self.__send_request__('/api/agents/cache', data)
 
 
 def prepare_binary(name, data):
