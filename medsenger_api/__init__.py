@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.14"
+__version__ = "0.1.15"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -80,7 +80,7 @@ class AgentApiClient:
             'birthday': ''
         }
 
-    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None, group=False, return_count=False):
+    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None, group=False, return_count=False, inner_list=False):
 
         data = {
             "contract_id": contract_id,
@@ -103,7 +103,7 @@ class AgentApiClient:
         if return_count:
             data['return_count'] = True
 
-        if not category_name:
+        if not category_name or ',' in category_name or inner_list:
             url = "/api/agents/records/get/all"
         else:
             url = "/api/agents/records/get"

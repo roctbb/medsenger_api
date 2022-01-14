@@ -13,6 +13,9 @@ class TestApi(TestCase):
     def test_get_records(self):
         print(self.create_client().get_records(CONTRACT_ID, "systolic_pressure"))
 
+    def test_get_records_from_multiple_categroies(self):
+        print(self.create_client().get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure", inner_list=True))
+
     def test_send_message_with_attachments(self):
         client = self.create_client()
         client.send_message(contract_id=CONTRACT_ID, text='', attachments=[prepare_file('image_2021-08-30_13-42-19.png')], send_from='patient')
