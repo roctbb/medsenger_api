@@ -357,7 +357,7 @@ class AgentApiClient:
             "info_materials": materials
         }
 
-        return self.__send_request__('/api/info_materials/set', data)
+        return self.__send_request__('/api/agents/info_materials/set', data)
 
 
 def prepare_binary(name, data):
