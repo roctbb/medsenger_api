@@ -33,3 +33,9 @@ class TestApi(TestCase):
 
         print(result)
 
+    def test_clinics_info(self):
+        client = self.create_client()
+
+        print(client.get_clinics_info())
+
+

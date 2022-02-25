@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.17"
+__version__ = "0.1.18"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -79,6 +79,13 @@ class AgentApiClient:
             'sex': '',
             'birthday': ''
         }
+
+    def get_clinics_info(self):
+        data = {
+            "api_key": self.api_key,
+        }
+
+        return self.__send_request__('/api/agents/clinics', data) or []
 
     def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None, group=False, return_count=False, inner_list=False):
 
