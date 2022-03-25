@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.18"
+__version__ = "0.1.19"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -97,6 +97,8 @@ class AgentApiClient:
         if category_name:
             data["category_name"] = category_name
 
+        full_list = not category_name or ',' in category_name or inner_list
+
         if limit:
             data['limit'] = limit
         if offset:
@@ -106,11 +108,14 @@ class AgentApiClient:
         if time_to:
             data['to'] = time_to
         if group:
-            data['last_group'] = True
+            if full_list:
+                data['same_group'] = True
+            else:
+                data['last_group'] = True
         if return_count:
             data['return_count'] = True
 
-        if not category_name or ',' in category_name or inner_list:
+        if full_list:
             url = "/api/agents/records/get/all"
         else:
             url = "/api/agents/records/get"

@@ -14,7 +14,10 @@ class TestApi(TestCase):
         print(self.create_client().get_records(CONTRACT_ID, "systolic_pressure"))
 
     def test_get_records_from_multiple_categroies(self):
-        print(self.create_client().get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure", inner_list=True))
+        records = self.create_client().get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure", inner_list=True, group=True)
+
+        for record in records:
+            print(record['category_info']['name'], record.get('group'))
 
     def test_send_message_with_attachments(self):
         client = self.create_client()
