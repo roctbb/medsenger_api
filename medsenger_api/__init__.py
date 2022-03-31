@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.19"
+__version__ = "0.1.20"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -197,7 +197,7 @@ class AgentApiClient:
     def send_message(self, contract_id, text, action_link=None, action_name=None, action_onetime=True,
                      only_doctor=False,
                      only_patient=False, action_deadline=None, is_urgent=False, need_answer=False,
-                     attachments=None, action_big=True, send_from=None, forward_to_doctor=True):
+                     attachments=None, action_big=True, send_from=None, forward_to_doctor=True, action_type='action'):
         message = {
             "text": text,
             "forward_to_doctor": forward_to_doctor
@@ -217,6 +217,9 @@ class AgentApiClient:
 
         if action_big:
             message['action_big'] = action_big
+
+        if action_type:
+            message['action_type'] = action_type
 
         if only_doctor:
             message['only_doctor'] = only_doctor

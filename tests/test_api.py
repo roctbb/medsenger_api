@@ -14,7 +14,7 @@ class TestApi(TestCase):
         print(self.create_client().get_records(CONTRACT_ID, "systolic_pressure"))
 
     def test_get_records_from_multiple_categroies(self):
-        records = self.create_client().get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure", inner_list=True, group=True)
+        records = self.create_client().get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure", inner_list=True, group=False)
 
         for record in records:
             print(record['category_info']['name'], record.get('group'))
