@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.20"
+__version__ = "0.1.21"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -87,7 +87,8 @@ class AgentApiClient:
 
         return self.__send_request__('/api/agents/clinics', data) or []
 
-    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None, group=False, return_count=False, inner_list=False):
+    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
+                    group=False, return_count=False, inner_list=False):
 
         data = {
             "contract_id": contract_id,
@@ -190,7 +191,8 @@ class AgentApiClient:
                 files = record.get('files', [])
 
             data['values'].append(
-                {"category_name": category_name, "value": value, "params": record_params, "files": files, "time": record_time})
+                {"category_name": category_name, "value": value, "params": record_params, "files": files,
+                 "time": record_time})
 
         return self.__send_request__('/api/agents/records/add', data)
 
@@ -291,6 +293,16 @@ class AgentApiClient:
             data['action_link'] = action_link
 
         return self.__send_request__('/api/agents/tasks/add', data)
+
+    def request_payment(self, inv_id, amount, title):
+        data = {
+            "api_key": self.api_key,
+            "title": title,
+            "inv_id": inv_id,
+            "sum": amount
+        }
+
+        return self.__send_request__('/api/agents/payments/request', data)
 
     def send_order(self, contract_id, order, receiver_id=None, params=None):
         data = {
