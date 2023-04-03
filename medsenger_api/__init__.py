@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.21"
+__version__ = "0.1.23"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
@@ -151,7 +151,7 @@ class AgentApiClient:
 
         return self.__send_request__('/api/agents/records/addition', data)
 
-    def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None):
+    def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None, return_id=False):
         data = {
             "contract_id": contract_id,
             "api_key": self.api_key,
@@ -168,9 +168,12 @@ class AgentApiClient:
         if files:
             data['files'] = files
 
+        if return_id:
+            data['return_id'] = True
+
         return self.__send_request__('/api/agents/records/add', data)
 
-    def add_records(self, contract_id, values, record_time=None, params={}):
+    def add_records(self, contract_id, values, record_time=None, params={}, return_id=False):
         data = {"contract_id": contract_id, "api_key": self.api_key, 'values': []}
 
         for record in values:
@@ -193,6 +196,9 @@ class AgentApiClient:
             data['values'].append(
                 {"category_name": category_name, "value": value, "params": record_params, "files": files,
                  "time": record_time})
+
+        if return_id:
+            data['return_id'] = True
 
         return self.__send_request__('/api/agents/records/add', data)
 
