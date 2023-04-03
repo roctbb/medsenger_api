@@ -123,6 +123,16 @@ class AgentApiClient:
 
         return self.__send_request__(url, data) or None
 
+    def get_record_by_id(self, contract_id, record_id):
+
+        data = {
+            "contract_id": contract_id,
+            "record_id": record_id,
+            "api_key": self.api_key,
+        }
+
+        return self.__send_request__("/api/agents/records/get", data) or None
+
     def add_hooks(self, contract_id, names):
         data = {
             "contract_id": contract_id,
