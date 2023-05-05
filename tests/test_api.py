@@ -41,4 +41,14 @@ class TestApi(TestCase):
 
         print(client.get_clinics_info())
 
+    def test_add_record_with_id_returns_ids(self):
+        client = self.create_client()
+
+        result = client.add_record(CONTRACT_ID, 'systolic_pressure', value=120, return_id=True)
+
+        print(result)
+
+        id = result[0]
+
+        print(client.get_record_by_id(CONTRACT_ID, id))
 
