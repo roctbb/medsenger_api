@@ -7,6 +7,9 @@ class TestApi(TestCase):
     def create_client(self):
         return AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, True)
 
+    def test_get_categories(self):
+        print(self.create_client().get_categories())
+
     def test_get_available_categories(self):
         print(self.create_client().get_available_categories(CONTRACT_ID))
 
@@ -21,7 +24,7 @@ class TestApi(TestCase):
 
     def test_send_message_with_attachments(self):
         client = self.create_client()
-        client.send_message(contract_id=CONTRACT_ID, text='', attachments=[prepare_file('image_2021-08-30_13-42-19.png')], send_from='patient')
+        client.send_message(contract_id=CONTRACT_ID, text='', attachments=[prepare_file('.gitignore')], send_from='patient')
 
     def test_add_record_with_file(self):
         client = self.create_client()

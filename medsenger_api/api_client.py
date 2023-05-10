@@ -1,5 +1,5 @@
-from grpc_client import RecordsClient
-from rest_client import RestApiClient
+from .grpc_client import RecordsClient
+from .rest_client import RestApiClient
 
 
 class AgentApiClient:
@@ -62,8 +62,6 @@ class AgentApiClient:
                 method = self.grpc_client.get_records
 
             return method(self.user_cache[contract_id], category_name, time_from, time_to, offset, limit, group, inner_list)
-
-        return []
 
     def get_record_by_id(self, contract_id, record_id):
         if not self.grpc_client:
@@ -145,28 +143,3 @@ class AgentApiClient:
         )
 
 
-def prepare_binary(name, data):
-    import magic
-    type = magic.from_buffer(data, mime=True)
-
-    return {
-        "name": name,
-        "base64": base64.b64encode(data).decode('utf-8'),
-        "type": type
-    }
-
-
-def prepare_file(filename):
-    import magic
-    import os
-
-    type = magic.from_file(filename, mime=True)
-
-    with open(filename, 'rb') as file:
-        answer = {
-            "name": filename.split(os.sep)[-1],
-            "base64": base64.b64encode(file.read()).decode('utf-8'),
-            "type": type
-        }
-
-    return answer

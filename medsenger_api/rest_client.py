@@ -1,9 +1,6 @@
-import base64
-import uuid
 from copy import copy
 import requests
 from datetime import datetime
-from grpc_client import RecordsClient
 
 
 class RestApiClient:

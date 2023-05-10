@@ -7,4 +7,6 @@ __version__ = "0.1.23"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
-from api_client import AgentApiClient
+from .api_client import AgentApiClient
+from .utils import *
+from .protocol import *
