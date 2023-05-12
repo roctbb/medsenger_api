@@ -7,7 +7,7 @@ from .protocol import records_pb2 as pb2
 
 class RecordsClient(object):
     def __init__(self, debug=False):
-        self.host = 'localhost'
+        self.host = 'medsenger.ru'
         self.server_port = 50051
         self.__categories_by_id = {}
         self.__categories_by_name = {}
@@ -141,12 +141,17 @@ class RecordsClient(object):
         result = method(request)
 
         if full_list:
-            return [self.__present_record(record, with_category=True) for record in result.records]
+            result = [self.__present_record(record, with_category=True) for record in result.records]
+
+            if not result:
+                return None
         else:
-            return {
+            result = {
                 "category": self.__present_category(self.__categories_by_name.get(category_name)),
                 "values": [self.__present_record(record, with_category=False) for record in result.records]
             }
+
+        return result
 
     def get_records(self, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()), offset=0,
                     limit=None, group=False, inner_list=False):
