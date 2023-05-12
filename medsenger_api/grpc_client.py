@@ -10,6 +10,8 @@ class RecordsClient(object):
         if not host:
             host = "medsenger.ru"
 
+        print(host)
+
         self.host = host
         self.server_port = 50051
         self.__categories_by_id = {}
@@ -33,8 +35,6 @@ class RecordsClient(object):
         if not self.__categories_by_id or id not in self.__categories_by_id:
             print("Loading categories")
             self.get_categories()
-        elif self.__debug:
-            print("Category found")
 
         return self.__categories_by_id.get(id)
 
@@ -42,8 +42,6 @@ class RecordsClient(object):
         if not self.__categories_by_name or name not in self.__categories_by_name:
             print("Loading categories")
             self.get_categories()
-        elif self.__debug:
-            print("Category found")
 
         return self.__categories_by_name.get(name)
 
@@ -51,8 +49,6 @@ class RecordsClient(object):
         if not self.__categories_by_name:
             print("Loading categories")
             self.get_categories()
-        elif self.__debug:
-            print("Category found")
 
         return [self.__categories_by_name[name].id for name in category_names if name in self.__categories_by_name]
 

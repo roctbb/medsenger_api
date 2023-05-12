@@ -10,7 +10,8 @@ class AgentApiClient:
         self.categories_cache = {}
 
         if use_grpc:
-            self.grpc_client = RecordsClient(grpc_host)
+            print(grpc_host)
+            self.grpc_client = RecordsClient(True, grpc_host)
 
     def get_categories(self):
         if not self.grpc_client:
