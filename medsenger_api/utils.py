@@ -1,4 +1,8 @@
 import base64
+import os
+import sys
+from datetime import datetime
+
 
 def prepare_binary(name, data):
     import magic
@@ -25,3 +29,20 @@ def prepare_file(filename):
         }
 
     return answer
+
+def gts():
+    now = datetime.now()
+    return now.strftime("%Y-%m-%d %H:%M:%S - ")
+
+def safe(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            file_name = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(gts(), exc_type, file_name, exc_tb.tb_lineno, e, "CRITICAL")
+            return None
+
+    wrapper.__name__ = func.__name__
+    return wrapper

@@ -1,6 +1,7 @@
 import json
 import time
 import grpc
+from .utils import *
 from .protocol import records_pb2_grpc as pb2_grpc
 from .protocol import records_pb2 as pb2
 
@@ -9,8 +10,6 @@ class RecordsClient(object):
     def __init__(self, debug=False, host=None):
         if not host:
             host = "medsenger.ru"
-
-        print(host)
 
         self.host = host
         self.server_port = 50051
@@ -101,6 +100,7 @@ class RecordsClient(object):
 
         return presentation
 
+    @safe
     def get_categories(self):
         request = pb2.Empty()
         result = self.stub.GetCategoryList(request)
@@ -111,12 +111,14 @@ class RecordsClient(object):
 
         return [self.__present_category(category) for category in result.categories]
 
+    @safe
     def get_categories_for_user(self, user_id):
         request = pb2.User(id=user_id)
         result = self.stub.GetCategoryListForUser(request)
 
         return [self.__present_category(category) for category in result.categories]
 
+    @safe
     def get_record_by_id(self, record_id):
         request = pb2.RecordRequest(id=record_id)
         result = self.stub.GetRecordById(request)
@@ -152,11 +154,13 @@ class RecordsClient(object):
 
         return result
 
+    @safe
     def get_records(self, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()), offset=0,
                     limit=None, group=False, inner_list=False):
         return self.__aggregate_records(self.stub.GetRecords, user_id, category_name, from_timestamp, to_timestamp,
                                         offset, limit, group, inner_list)
 
+    @safe
     def count_records(self, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()), offset=0,
                       limit=None, group=False, inner_list=False):
 
