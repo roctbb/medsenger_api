@@ -11,7 +11,7 @@ class AgentApiClient:
 
         if use_grpc:
             print(grpc_host)
-            self.grpc_client = RecordsClient(True, grpc_host)
+            self.grpc_client = RecordsClient(host=grpc_host)
 
     def get_categories(self):
         if not self.grpc_client:
