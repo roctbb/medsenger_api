@@ -136,8 +136,20 @@ class RecordsClient(object):
         if category_names and not category_ids:
             return None
 
-        request = pb2.RecordQuery(user_id=user_id, category_ids=category_ids, from_timestamp=int(from_timestamp),
-                                  to_timestamp=int(to_timestamp), offset=int(offset), limit=int(limit), with_group=group)
+        if from_timestamp is not None:
+            from_timestamp = int(from_timestamp)
+
+        if to_timestamp is not None:
+            to_timestamp = int(to_timestamp)
+
+        if offset is not None:
+            offset = int(offset)
+
+        if limit is not None:
+            limit = int(limit)
+
+        request = pb2.RecordQuery(user_id=user_id, category_ids=category_ids, from_timestamp=from_timestamp,
+                                  to_timestamp=to_timestamp, offset=offset, limit=limit, with_group=group)
 
         result = method(request)
 
