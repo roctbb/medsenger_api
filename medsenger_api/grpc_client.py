@@ -6,8 +6,11 @@ from .protocol import records_pb2 as pb2
 
 
 class RecordsClient(object):
-    def __init__(self, debug=False):
-        self.host = 'medsenger.ru'
+    def __init__(self, debug=False, host=None):
+        if not host:
+            host = "medsenger.ru"
+
+        self.host = host
         self.server_port = 50051
         self.__categories_by_id = {}
         self.__categories_by_name = {}

@@ -3,14 +3,14 @@ from .rest_client import RestApiClient
 
 
 class AgentApiClient:
-    def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False, use_grpc=False):
+    def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False, use_grpc=False, grpc_host=None):
         self.rest_client = RestApiClient(api_key, host, agent_id, debug)
         self.grpc_client = None
         self.user_cache = {}
         self.categories_cache = {}
 
         if use_grpc:
-            self.grpc_client = RecordsClient()
+            self.grpc_client = RecordsClient(grpc_host)
 
     def get_categories(self):
         if not self.grpc_client:
