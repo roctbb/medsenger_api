@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='medsenger_api',
-    version='0.1.24',
+    version='0.1.25',
     description='Python SDK for Medsenger.AI',
     url='https://github.com/roctbb/medsenger_api',
     author='Rostislav Borodin',
@@ -10,7 +10,6 @@ setup(
     license='BSD 2-clause',
     packages=['medsenger_api'],
     install_requires=['requests', 'python-magic'],
-
     classifiers=[
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3.7',
