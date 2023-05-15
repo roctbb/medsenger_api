@@ -8,10 +8,10 @@ class AgentApiClient:
         self.grpc_client = None
         self.user_cache = {}
         self.categories_cache = {}
+        self.debug = debug
 
         if use_grpc:
-            print(grpc_host)
-            self.grpc_client = RecordsClient(host=grpc_host)
+            self.grpc_client = RecordsClient(host=grpc_host, debug=debug)
 
     def get_categories(self):
         if not self.grpc_client:
@@ -38,6 +38,9 @@ class AgentApiClient:
 
     def get_patient_info(self, contract_id):
         result = self.rest_client.get_patient_info(contract_id)
+
+        if self.debug:
+            print(result)
 
         if result.get('id'):
             self.user_cache[contract_id] = result.get('id')

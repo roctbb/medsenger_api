@@ -3,6 +3,9 @@ import os
 import sys
 from datetime import datetime
 
+class GrpcConnectionError(Exception):
+    pass
+
 
 def prepare_binary(name, data):
     import magic
@@ -38,6 +41,8 @@ def safe(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
+        except GrpcConnectionError as e:
+            raise e
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             file_name = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]

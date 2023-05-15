@@ -3,7 +3,7 @@ medsenger_api.
 Python SDK for Medsenger.AI
 """
 
-__version__ = "0.1.31"
+__version__ = "0.1.32"
 __author__ = 'Rostislav Borodin'
 __credits__ = 'TelePat LLC'
 
