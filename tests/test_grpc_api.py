@@ -117,3 +117,14 @@ class TestApi(TestCase):
                     print("b: ", b)
 
         assert G == D
+
+    def test_count_records(self):
+        S = time.time()
+        G = self.grpc_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", return_count=True)
+        print("G time:", time.time() - S)
+
+        S = time.time()
+        D = self.default_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", return_count=True)
+        print("D time:", time.time() - S)
+
+        assert G == D

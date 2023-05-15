@@ -177,29 +177,34 @@ class RecordsClient(object):
                                   to_timestamp=to_timestamp, offset=offset, limit=limit, with_group=group)
 
         result = self.__make_request(method, request, timeout=25, tries=2)
+        records = None
 
         if full_list:
-            result = [self.__present_record(record, with_category=True) for record in result.records]
-
-            if not result:
-                return None
+            if result.records:
+                records = [self.__present_record(record, with_category=True) for record in result.records]
         else:
-            result = {
-                "category": self.__present_category(self.__categories_by_name.get(category_name)),
-                "values": [self.__present_record(record, with_category=False) for record in result.records]
-            }
+            if result.records:
+                records = {
+                    "category": self.__present_category(self.__categories_by_name.get(category_name)),
+                    "values": [self.__present_record(record, with_category=False) for record in result.records]
+                }
 
-        return result
+        return records, result.count
 
     @safe
     def get_records(self, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()), offset=0,
                     limit=None, group=False, inner_list=False):
-        return self.__aggregate_records(self.stub.GetRecords, user_id, category_name, from_timestamp, to_timestamp,
-                                        offset, limit, group, inner_list)
+        records, count = self.__aggregate_records(self.stub.GetRecords, user_id, category_name, from_timestamp,
+                                                  to_timestamp,
+                                                  offset, limit, group, inner_list)
+        return records
 
     @safe
     def count_records(self, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()), offset=0,
                       limit=None, group=False, inner_list=False):
 
-        return self.__aggregate_records(self.stub.CountRecords, user_id, category_name, from_timestamp, to_timestamp,
-                                        offset, limit, group, inner_list)
+        records, count = self.__aggregate_records(self.stub.CountRecords, user_id, category_name, from_timestamp,
+                                                  to_timestamp,
+                                                  offset, limit, group, inner_list)
+
+        return {"count": count}

@@ -42,7 +42,7 @@ class RecordsStub(object):
         self.CountRecords = channel.unary_unary(
                 '/records.Records/CountRecords',
                 request_serializer=protocol_dot_records__pb2.RecordQuery.SerializeToString,
-                response_deserializer=protocol_dot_records__pb2.RecordNumber.FromString,
+                response_deserializer=protocol_dot_records__pb2.RecordList.FromString,
                 )
 
 
@@ -116,7 +116,7 @@ def add_RecordsServicer_to_server(servicer, server):
             'CountRecords': grpc.unary_unary_rpc_method_handler(
                     servicer.CountRecords,
                     request_deserializer=protocol_dot_records__pb2.RecordQuery.FromString,
-                    response_serializer=protocol_dot_records__pb2.RecordNumber.SerializeToString,
+                    response_serializer=protocol_dot_records__pb2.RecordList.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -226,6 +226,6 @@ class Records(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/records.Records/CountRecords',
             protocol_dot_records__pb2.RecordQuery.SerializeToString,
-            protocol_dot_records__pb2.RecordNumber.FromString,
+            protocol_dot_records__pb2.RecordList.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
