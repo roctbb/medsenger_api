@@ -159,7 +159,10 @@ class RecordsClient(object):
         category_ids = self.__find_ids_for_categories(category_names)
 
         if category_names and not category_ids:
-            return None
+            if self.__debug:
+                print("Category search failed:", category_names, self.__categories_by_name.keys())
+
+            return None, 0
 
         if from_timestamp is not None:
             from_timestamp = int(from_timestamp)
