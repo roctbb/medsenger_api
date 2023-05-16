@@ -1,3 +1,4 @@
+import json
 import time
 
 from medsenger_api import AgentApiClient, prepare_file
@@ -15,9 +16,6 @@ class TestApi(TestCase):
     def test_get_available_categories(self):
         G = self.grpc_client.get_available_categories(CONTRACT_ID)
         D = self.default_client.get_available_categories(CONTRACT_ID)
-
-        G.sort(key=lambda c: c['id'])
-        D.sort(key=lambda c: c['id'])
 
         for a, b in zip(G, D):
             if a != b:
@@ -38,9 +36,6 @@ class TestApi(TestCase):
         D = self.default_client.get_records(CONTRACT_ID, "systolic_pressure")
         print("D time:", time.time() - S)
 
-        G['values'].sort(key=lambda c: c['id'])
-        D['values'].sort(key=lambda c: c['id'])
-
         for a, b in zip(G['values'], D['values']):
             if a != b:
                 print("a: ", a)
@@ -48,19 +43,16 @@ class TestApi(TestCase):
 
         assert G == D
 
-    def test_get_records_from_multiple_categroies(self):
+    def test_get_records_from_multiple_categories(self):
         S = time.time()
-        G = self.grpc_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse")
+        G = self.grpc_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", limit=1000)
         print("G time:", time.time() - S)
 
         S = time.time()
-        D = self.default_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse")
+        D = self.default_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", limit=1000)
         print("D time:", time.time() - S)
 
-        G.sort(key=lambda c: c['id'])
-        D.sort(key=lambda c: c['id'])
-
-        print(type(G), type(D))
+        json.dump([G, D], open('mdump.json', 'w'))
 
         for a, b in zip(G, D):
             if a != b:
@@ -78,8 +70,6 @@ class TestApi(TestCase):
         D = self.default_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", offset=100, limit=100)
         print("D time:", time.time() - S)
 
-        G.sort(key=lambda c: c['id'])
-        D.sort(key=lambda c: c['id'])
 
         print(type(G), type(D))
 
@@ -102,11 +92,6 @@ class TestApi(TestCase):
         D = self.default_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", time_from=F, time_to=T)
         print("D time:", time.time() - S)
 
-        if D and G:
-            G.sort(key=lambda c: c['id'])
-            D.sort(key=lambda c: c['id'])
-        else:
-            print(D,G)
 
         print(type(G), type(D))
 
