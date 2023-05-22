@@ -106,7 +106,7 @@ class RecordsClient(object):
 
         return presentation
 
-    def __make_request(self, F, *args, timeout=10, tries=3):
+    def __make_request(self, F, *args, timeout=30, tries=3):
         if self.__debug:
             print(gts(), " GRPC request to {} with params {}".format(F, args))
 
@@ -132,7 +132,7 @@ class RecordsClient(object):
     def get_categories(self):
         request = pb2.Empty()
 
-        result = self.__make_request(self.stub.GetCategoryList, request, timeout=10)
+        result = self.__make_request(self.stub.GetCategoryList, request)
 
         for category in result.categories:
             self.__categories_by_id[category.id] = category
@@ -144,7 +144,7 @@ class RecordsClient(object):
     def get_categories_for_user(self, user_id):
         request = pb2.User(id=user_id)
 
-        result = self.__make_request(self.stub.GetCategoryListForUser, request, timeout=10)
+        result = self.__make_request(self.stub.GetCategoryListForUser, request)
 
         return [self.__present_category(category) for category in result.categories]
 
@@ -152,7 +152,7 @@ class RecordsClient(object):
     def get_record_by_id(self, record_id):
         request = pb2.RecordRequest(id=record_id)
 
-        result = self.__make_request(self.stub.GetRecordById, request, timeout=10)
+        result = self.__make_request(self.stub.GetRecordById, request)
 
         return [self.__present_record(record) for record in result]
 
@@ -185,7 +185,7 @@ class RecordsClient(object):
         request = pb2.RecordQuery(user_id=user_id, category_ids=category_ids, from_timestamp=from_timestamp,
                                   to_timestamp=to_timestamp, offset=offset, limit=limit, with_group=group)
 
-        result = self.__make_request(method, request, timeout=25, tries=2)
+        result = self.__make_request(method, request, timeout=60, tries=2)
         records = None
 
         if full_list:
