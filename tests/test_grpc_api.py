@@ -113,3 +113,23 @@ class TestApi(TestCase):
         print("D time:", time.time() - S)
 
         assert G == D
+
+    def test_get_single_record(self):
+        record = self.default_client.add_record(CONTRACT_ID, "pulse", 60, return_id=True)
+
+        D = self.default_client.get_record_by_id(CONTRACT_ID, record[0])
+        G = self.grpc_client.get_record_by_id(CONTRACT_ID, record[0])
+
+        print(D, G)
+
+        assert D == G
+
+    def test_get_single_record_404(self):
+        record = self.default_client.add_record(CONTRACT_ID, "pulse", 60, return_id=True)
+
+        D = self.default_client.get_record_by_id(CONTRACT_ID, record[0] + 1)
+        G = self.grpc_client.get_record_by_id(CONTRACT_ID, record[0] + 1)
+
+        print(D, G)
+
+        assert D == G

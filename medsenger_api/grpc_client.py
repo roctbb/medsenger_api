@@ -7,6 +7,20 @@ from .protocol import records_pb2 as pb2
 
 
 class RecordsClient(object):
+    def __get_method__(self, method, stub):
+        if method == 'GetCategoryList':
+            return stub.GetCategoryList
+        elif method == 'GetCategoryListForUser':
+            return stub.GetCategoryListForUser
+        elif method == 'GetRecordById':
+            return stub.GetRecordById
+        elif method == 'GetRecords':
+            return stub.GetRecords
+        elif method == 'CountRecords':
+            return stub.CountRecords
+        else:
+            return None
+
     def __create_connection__(self):
         if self.channel:
             if self.__debug:
@@ -119,33 +133,40 @@ class RecordsClient(object):
 
         return presentation
 
-    def __make_request(self, F, *args, timeout=5, tries=3):
+    def __make_request(self, method, *args, timeout=5, tries=3):
         if self.__debug:
-            print(gts(), " GRPC request to {} with params {}".format(F, args))
+            print(gts(), " GRPC request to {} with params {}".format(method, args))
 
         exception = None
         for i in range(tries):
             try:
-                return F(*args, timeout=timeout)
+                F = self.__get_method__(method, self.stub)
 
-            except Exception as e:
+                if F:
+                    return F(*args, timeout=timeout)
+                else:
+                    raise Exception("Wrong method")
+            except grpc.RpcError as e:
                 print("Exception in GRPC request: ", e)
 
-                exception = e
+                if e.code() == grpc.StatusCode.NOT_FOUND:
+                    return None
+                else:
+                    exception = e
 
-                self.__create_connection__()
+                    self.__create_connection__()
 
-                if self.__debug:
-                    print("Retrying request... {}".format(i + 1))
+                    if self.__debug:
+                        print("Retrying request... {}".format(i + 1))
 
         print("Request failed!")
-        raise GrpcConnectionError("GRPC request error to {} with params {}: {}".format(F, args, exception))
+        raise GrpcConnectionError("GRPC request error to {} with params {}: {}".format(method, args, exception))
 
     @safe
     def get_categories(self):
         request = pb2.Empty()
 
-        result = self.__make_request(self.stub.GetCategoryList, request)
+        result = self.__make_request('GetCategoryList', request)
 
         for category in result.categories:
             self.__categories_by_id[category.id] = category
@@ -157,7 +178,7 @@ class RecordsClient(object):
     def get_categories_for_user(self, user_id):
         request = pb2.User(id=user_id)
 
-        result = self.__make_request(self.stub.GetCategoryListForUser, request)
+        result = self.__make_request('GetCategoryListForUser', request)
 
         return [self.__present_category(category) for category in result.categories]
 
@@ -165,9 +186,12 @@ class RecordsClient(object):
     def get_record_by_id(self, record_id):
         request = pb2.RecordRequest(id=record_id)
 
-        result = self.__make_request(self.stub.GetRecordById, request)
+        record = self.__make_request('GetRecordById', request)
 
-        return [self.__present_record(record) for record in result]
+        if record:
+            return self.__present_record(record)
+        else:
+            return None
 
     def __aggregate_records(self, method, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()),
                             offset=0,
@@ -216,7 +240,7 @@ class RecordsClient(object):
     @safe
     def get_records(self, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()), offset=0,
                     limit=None, group=False, inner_list=False):
-        records, count = self.__aggregate_records(self.stub.GetRecords, user_id, category_name, from_timestamp,
+        records, count = self.__aggregate_records('GetRecords', user_id, category_name, from_timestamp,
                                                   to_timestamp,
                                                   offset, limit, group, inner_list)
         return records
@@ -225,7 +249,7 @@ class RecordsClient(object):
     def count_records(self, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()), offset=0,
                       limit=None, group=False, inner_list=False):
 
-        records, count = self.__aggregate_records(self.stub.CountRecords, user_id, category_name, from_timestamp,
+        records, count = self.__aggregate_records('CountRecords', user_id, category_name, from_timestamp,
                                                   to_timestamp,
                                                   offset, limit, group, inner_list)
 
