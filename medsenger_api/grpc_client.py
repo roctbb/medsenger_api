@@ -7,15 +7,15 @@ from .protocol import records_pb2 as pb2
 
 
 class RecordsClient(object):
-    def __init__(self, debug=False, host=None):
-        if not host:
-            host = "medsenger.ru"
+    def __create_connection__(self):
+        if self.channel:
+            if self.__debug:
+                print("Closing GRPC connection")
 
-        self.host = host
-        self.server_port = 50051
-        self.__categories_by_id = {}
-        self.__categories_by_name = {}
-        self.__debug = debug
+            self.channel.close()
+
+        if self.__debug:
+            print("Connecting to GRPC...")
 
         # instantiate a channel
         self.channel = grpc.insecure_channel(
@@ -35,6 +35,19 @@ class RecordsClient(object):
 
         if self.__debug:
             print("Connected to GRPC")
+
+    def __init__(self, debug=False, host=None):
+        if not host:
+            host = "medsenger.ru"
+
+        self.host = host
+        self.server_port = 50051
+        self.__categories_by_id = {}
+        self.__categories_by_name = {}
+        self.__debug = debug
+        self.channel = None
+
+        self.__create_connection__()
 
     def __find_category_by_id(self, id):
         if not self.__categories_by_id or id not in self.__categories_by_id:
@@ -106,7 +119,7 @@ class RecordsClient(object):
 
         return presentation
 
-    def __make_request(self, F, *args, timeout=30, tries=3):
+    def __make_request(self, F, *args, timeout=5, tries=3):
         if self.__debug:
             print(gts(), " GRPC request to {} with params {}".format(F, args))
 
@@ -119,6 +132,8 @@ class RecordsClient(object):
                 print("Exception in GRPC request: ", e)
 
                 exception = e
+
+                self.__create_connection__()
 
                 if self.__debug:
                     print("Retrying request... {}".format(i + 1))
