@@ -113,8 +113,8 @@ class RecordsClient(object):
         exception = None
         for i in range(tries):
             try:
-                result = F(*args, timeout=timeout)
-                break
+                return F(*args, timeout=timeout)
+
             except Exception as e:
                 print("Exception in GRPC request: ", e)
 
@@ -122,11 +122,9 @@ class RecordsClient(object):
 
                 if self.__debug:
                     print("Retrying request... {}".format(i + 1))
-        else:
-            print("Request failed!")
-            raise GrpcConnectionError("GRPC request error to {} with params {}: {}".format(F, args, exception))
 
-        return result
+        print("Request failed!")
+        raise GrpcConnectionError("GRPC request error to {} with params {}: {}".format(F, args, exception))
 
     @safe
     def get_categories(self):
