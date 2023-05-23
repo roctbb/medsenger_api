@@ -50,6 +50,9 @@ class RecordsClient(object):
         if self.__debug:
             print("Connected to GRPC")
 
+    def __close_connection__(self):
+        self.channel.close()
+
     def __init__(self, debug=False, host=None):
         if not host:
             host = "medsenger.ru"
@@ -133,7 +136,10 @@ class RecordsClient(object):
 
         return presentation
 
-    def __make_request(self, method, *args, timeout=5, tries=3):
+    def __make_request(self, method, *args, timeout=15, tries=3):
+
+        self.__create_connection__()
+
         if self.__debug:
             print(gts(), " GRPC request to {} with params {}".format(method, args))
 
@@ -154,10 +160,14 @@ class RecordsClient(object):
                 else:
                     exception = e
 
+                    time.sleep(5)
+
                     self.__create_connection__()
 
                     if self.__debug:
                         print("Retrying request... {}".format(i + 1))
+
+        self.__close_connection__()
 
         print("Request failed!")
         raise GrpcConnectionError("GRPC request error to {} with params {}: {}".format(method, args, exception))
