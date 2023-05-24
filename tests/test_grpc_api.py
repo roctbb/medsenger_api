@@ -7,7 +7,7 @@ from tests.config import *
 
 
 class TestApi(TestCase):
-    grpc_client = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, True, True, 'localhost')
+    grpc_client = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, True, True, 'localhost', sentry_dsn=DSN)
     default_client = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, True, False)
 
     def test_get_categories(self):

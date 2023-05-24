@@ -1,19 +1,24 @@
 from .utils import gts
 from .grpc_client import RecordsClient
 from .rest_client import RestApiClient
+import sentry_sdk
 
 
 class AgentApiClient:
     def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False, use_grpc=False,
-                 grpc_host=None):
+                 grpc_host=None, sentry_dsn=None):
         self.rest_client = RestApiClient(api_key, host, agent_id, debug)
         self.grpc_client = None
         self.user_cache = {}
         self.categories_cache = {}
         self.debug = debug
+        self.dsn = sentry_dsn
 
         if use_grpc:
             self.grpc_client = RecordsClient(host=grpc_host, debug=debug)
+
+        if self.dsn:
+            sentry_sdk.init(dsn=self.dsn, traces_sample_rate=1.0)
 
     def get_categories(self):
         if self.grpc_client:
@@ -25,7 +30,9 @@ class AgentApiClient:
 
                 return categories
             except Exception as e:
-                print(gts(),"GRPC failed with error:", e)
+                if self.dsn:
+                    sentry_sdk.capture_exception(e)
+                print(gts(), "GRPC failed with error:", e)
 
         return self.rest_client.get_categories()
 
@@ -40,6 +47,8 @@ class AgentApiClient:
 
                 return []
             except Exception as e:
+                if self.dsn:
+                    sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
         return self.rest_client.get_available_categories(contract_id)
@@ -74,6 +83,8 @@ class AgentApiClient:
                 return method(self.user_cache[contract_id], category_name, time_from, time_to, offset, limit, group,
                               inner_list)
             except Exception as e:
+                if self.dsn:
+                    sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
         return self.rest_client.get_records(contract_id, category_name, time_from, time_to, limit, offset, group,
@@ -84,6 +95,8 @@ class AgentApiClient:
             try:
                 return self.grpc_client.get_record_by_id(record_id)
             except Exception as e:
+                if self.dsn:
+                    sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
         return self.rest_client.get_record_by_id(contract_id, record_id)
