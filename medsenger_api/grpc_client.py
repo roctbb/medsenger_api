@@ -64,8 +64,6 @@ class RecordsClient(object):
         self.__debug = debug
         self.channel = None
 
-        self.__create_connection__()
-
     def __find_category_by_id(self, id):
         if not self.__categories_by_id or id not in self.__categories_by_id:
             print("Loading categories")
