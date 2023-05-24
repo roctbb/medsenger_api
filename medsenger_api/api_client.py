@@ -1,9 +1,11 @@
+from .utils import gts
 from .grpc_client import RecordsClient
 from .rest_client import RestApiClient
 
 
 class AgentApiClient:
-    def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False, use_grpc=False, grpc_host=None):
+    def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False, use_grpc=False,
+                 grpc_host=None):
         self.rest_client = RestApiClient(api_key, host, agent_id, debug)
         self.grpc_client = None
         self.user_cache = {}
@@ -14,27 +16,33 @@ class AgentApiClient:
             self.grpc_client = RecordsClient(host=grpc_host, debug=debug)
 
     def get_categories(self):
-        if not self.grpc_client:
-            return self.rest_client.get_categories()
-        else:
-            categories = self.grpc_client.get_categories()
+        if self.grpc_client:
+            try:
+                categories = self.grpc_client.get_categories()
 
-            for category in categories:
-                self.categories_cache[category['name']] = category
+                for category in categories:
+                    self.categories_cache[category['name']] = category
 
-            return categories
+                return categories
+            except Exception as e:
+                print(gts(),"GRPC failed with error:", e)
+
+        return self.rest_client.get_categories()
 
     def get_available_categories(self, contract_id):
-        if not self.grpc_client:
-            return self.rest_client.get_available_categories(contract_id)
-        else:
-            if contract_id not in self.user_cache:
-                self.get_patient_info(contract_id)
+        if self.grpc_client:
+            try:
+                if contract_id not in self.user_cache:
+                    self.get_patient_info(contract_id)
 
-            if contract_id in self.user_cache:
-                return self.grpc_client.get_categories_for_user(self.user_cache[contract_id])
+                if contract_id in self.user_cache:
+                    return self.grpc_client.get_categories_for_user(self.user_cache[contract_id])
 
-            return []
+                return []
+            except Exception as e:
+                print(gts(), "GRPC failed with error:", e)
+
+        return self.rest_client.get_available_categories(contract_id)
 
     def get_patient_info(self, contract_id):
         result = self.rest_client.get_patient_info(contract_id)
@@ -53,25 +61,32 @@ class AgentApiClient:
     def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
                     group=False, return_count=False, inner_list=False):
 
-        if not self.grpc_client:
-            return self.rest_client.get_records(contract_id, category_name, time_from, time_to, limit, offset, group,
-                                                return_count, inner_list)
-        else:
-            if contract_id not in self.user_cache:
-                self.get_patient_info(contract_id)
+        if self.grpc_client:
+            try:
+                if contract_id not in self.user_cache:
+                    self.get_patient_info(contract_id)
 
-            if return_count:
-                method = self.grpc_client.count_records
-            else:
-                method = self.grpc_client.get_records
+                if return_count:
+                    method = self.grpc_client.count_records
+                else:
+                    method = self.grpc_client.get_records
 
-            return method(self.user_cache[contract_id], category_name, time_from, time_to, offset, limit, group, inner_list)
+                return method(self.user_cache[contract_id], category_name, time_from, time_to, offset, limit, group,
+                              inner_list)
+            except Exception as e:
+                print(gts(), "GRPC failed with error:", e)
+
+        return self.rest_client.get_records(contract_id, category_name, time_from, time_to, limit, offset, group,
+                                            return_count, inner_list)
 
     def get_record_by_id(self, contract_id, record_id):
-        if not self.grpc_client:
-            return self.rest_client.get_record_by_id(contract_id, record_id)
-        else:
-            return self.grpc_client.get_record_by_id(record_id)
+        if self.grpc_client:
+            try:
+                return self.grpc_client.get_record_by_id(record_id)
+            except Exception as e:
+                print(gts(), "GRPC failed with error:", e)
+
+        return self.rest_client.get_record_by_id(contract_id, record_id)
 
     def add_hooks(self, contract_id, names):
         return self.rest_client.add_hooks(contract_id, names)
@@ -145,5 +160,3 @@ class AgentApiClient:
                                  '8000') + "/api/client/agents/{agent_id}/?action={action}&contract_id={contract_id}&agent_token={agent_token}".format(
             agent_id=self.agent_id, action=action, contract_id=contract_id, agent_token=agent_token
         )
-
-

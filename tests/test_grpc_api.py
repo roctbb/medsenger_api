@@ -52,13 +52,6 @@ class TestApi(TestCase):
         D = self.default_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", limit=1000)
         print("D time:", time.time() - S)
 
-        json.dump([G, D], open('mdump.json', 'w'))
-
-        for a, b in zip(G, D):
-            if a != b:
-                print("a: ", a)
-                print("b: ", b)
-
         assert G == D
 
     def test_get_records_from_multiple_categroies_with_offset(self):

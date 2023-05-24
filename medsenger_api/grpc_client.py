@@ -134,7 +134,7 @@ class RecordsClient(object):
 
         return presentation
 
-    def __make_request(self, method, *args, timeout=15, tries=3):
+    def __make_request(self, method, *args, timeout=15, tries=2):
 
         self.__create_connection__()
 
@@ -158,7 +158,7 @@ class RecordsClient(object):
                 else:
                     exception = e
 
-                    time.sleep(5)
+                    time.sleep(tries)
 
                     self.__create_connection__()
 
