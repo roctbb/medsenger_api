@@ -1,3 +1,4 @@
+import time
 from .utils import gts
 from .grpc_client import RecordsClient
 from .rest_client import RestApiClient
@@ -14,6 +15,9 @@ class AgentApiClient:
         self.debug = debug
         self.dsn = sentry_dsn
 
+        self.categories = []
+        self.categories_last_request = 0
+
         if use_grpc:
             self.grpc_client = RecordsClient(host=grpc_host, debug=debug)
 
@@ -21,6 +25,11 @@ class AgentApiClient:
             sentry_sdk.init(dsn=self.dsn, traces_sample_rate=1.0)
 
     def get_categories(self):
+        if self.categories and time.time() - self.categories_last_request < 60:
+            return self.categories
+
+        self.categories_last_request = time.time()
+
         if self.grpc_client:
             try:
                 categories = self.grpc_client.get_categories()
