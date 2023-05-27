@@ -32,18 +32,19 @@ class AgentApiClient:
 
         if self.grpc_client:
             try:
-                categories = self.grpc_client.get_categories()
+                self.categories = self.grpc_client.get_categories()
 
-                for category in categories:
+                for category in self.categories:
                     self.categories_cache[category['name']] = category
 
-                return categories
+                return self.categories
             except Exception as e:
                 if self.dsn:
                     sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
-        return self.rest_client.get_categories()
+        self.categories = self.rest_client.get_categories()
+        return self.categories
 
     def get_available_categories(self, contract_id):
         if self.grpc_client:
