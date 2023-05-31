@@ -134,7 +134,7 @@ class RecordsClient(object):
 
         return presentation
 
-    def __make_request(self, method, *args, timeout=15, tries=2):
+    def __make_request(self, method, *args, timeout=20, tries=1):
 
         self.__create_connection__()
 
@@ -230,7 +230,7 @@ class RecordsClient(object):
         request = pb2.RecordQuery(user_id=user_id, category_ids=category_ids, from_timestamp=from_timestamp,
                                   to_timestamp=to_timestamp, offset=offset, limit=limit, with_group=group)
 
-        result = self.__make_request(method, request, timeout=60, tries=2)
+        result = self.__make_request(method, request)
         records = None
 
         if full_list:
