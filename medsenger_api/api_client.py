@@ -144,8 +144,8 @@ class AgentApiClient:
     def add_task(self, contract_id, text, target_number=1, date=None, important=False, action_link=None):
         return self.rest_client.add_task(contract_id, text, target_number, date, important, action_link)
 
-    def request_payment(self, inv_id, amount, title):
-        return self.rest_client.request_payment(inv_id, amount, title)
+    def request_payment(self, contract_id, inv_id, amount, title):
+        return self.rest_client.request_payment(contract_id, inv_id, amount, title)
 
     def send_order(self, contract_id, order, receiver_id=None, params=None):
         return self.rest_client.send_order(contract_id, order, receiver_id, params)

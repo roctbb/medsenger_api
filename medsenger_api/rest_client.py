@@ -299,12 +299,13 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/tasks/add', data)
 
-    def request_payment(self, inv_id, amount, title):
+    def request_payment(self, contract_id, inv_id, amount, title):
         data = {
             "api_key": self.api_key,
             "title": title,
             "inv_id": inv_id,
-            "sum": amount
+            "sum": amount,
+            "contract_id": contract_id
         }
 
         return self.__send_request__('/api/agents/payments/request', data)
