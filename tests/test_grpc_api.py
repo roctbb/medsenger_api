@@ -43,6 +43,22 @@ class TestApi(TestCase):
 
         assert G == D
 
+    def test_get_records_with_group(self):
+        S = time.time()
+        G = self.grpc_client.get_records(CONTRACT_ID, "systolic_pressure", limit=3, group=True)
+        print("G time:", time.time() - S)
+
+        S = time.time()
+        D = self.default_client.get_records(CONTRACT_ID, "systolic_pressure", limit=3, group=True)
+        print("D time:", time.time() - S)
+
+        for a, b in zip(G['values'], D['values']):
+            if a != b:
+                print("a: ", a)
+                print("b: ", b)
+
+        assert G == D
+
     def test_get_records_from_multiple_categories(self):
         S = time.time()
         G = self.grpc_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", limit=1000)
