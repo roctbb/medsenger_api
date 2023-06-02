@@ -138,6 +138,9 @@ class AgentApiClient:
                                              only_patient, action_deadline, is_urgent, need_answer,
                                              attachments, action_big, send_from, forward_to_doctor, action_type)
 
+    def outdate_message(self, contract_id, message_id):
+        return self.rest_client.outdate_message(contract_id, message_id)
+
     def finish_task(self, contract_id, task_id):
         return self.rest_client.finish_task(contract_id, task_id)
 

@@ -273,6 +273,15 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/message', data)
 
+    def outdate_message(self, contract_id, message_id):
+        data = {
+            "contract_id": contract_id,
+            "api_key": self.api_key,
+            "message_id": message_id,
+        }
+
+        return self.__send_request__('/api/agents/message/outdate', data)
+
     def finish_task(self, contract_id, task_id):
         data = {
             "contract_id": contract_id,

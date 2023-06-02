@@ -26,6 +26,15 @@ class TestApi(TestCase):
         client = self.create_client()
         client.send_message(contract_id=CONTRACT_ID, text='', attachments=[prepare_file('.gitignore')], send_from='patient')
 
+    def test_outdate_message(self):
+        client = self.create_client()
+        messsage = client.send_message(contract_id=CONTRACT_ID, text='', attachments=[prepare_file('.gitignore')],
+                            send_from='patient')
+
+        client.outdate_message(CONTRACT_ID, messsage['id'])
+
+
+
     def test_add_record_with_file(self):
         client = self.create_client()
 
