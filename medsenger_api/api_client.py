@@ -123,6 +123,9 @@ class AgentApiClient:
     def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None, return_id=False):
         return self.rest_client.add_record(contract_id, category_name, value, record_time, params, files, return_id)
 
+    def delete_record(self, contract_id, record_id):
+        return self.rest_client.delete_record(contract_id, record_id)
+
     def add_records(self, contract_id, values, record_time=None, params={}, return_id=False):
         return self.rest_client.add_records(contract_id, values, record_time, params, return_id)
 

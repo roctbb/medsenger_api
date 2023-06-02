@@ -55,3 +55,12 @@ class TestApi(TestCase):
 
         print(client.get_record_by_id(CONTRACT_ID, id))
 
+    def test_delete_record(self):
+        client = self.create_client()
+
+        result = client.add_record(CONTRACT_ID, 'systolic_pressure', value=120, return_id=True)
+        id = result[0]
+        client.delete_record(CONTRACT_ID, id)
+
+        assert client.get_record_by_id(CONTRACT_ID, id) == None
+

@@ -172,6 +172,15 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/records/add', data)
 
+    def delete_record(self, contract_id, record_id):
+        data = {
+            "contract_id": contract_id,
+            "api_key": self.api_key,
+            "record_id": record_id,
+        }
+
+        return self.__send_request__('/api/agents/records/delete', data)
+
     def add_records(self, contract_id, values, record_time=None, params={}, return_id=False):
         data = {"contract_id": contract_id, "api_key": self.api_key, 'values': []}
 
