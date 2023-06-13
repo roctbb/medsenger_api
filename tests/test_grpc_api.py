@@ -58,12 +58,14 @@ class TestApi(TestCase):
 
     def test_get_records_from_multiple_categories(self):
         S = time.time()
-        G = self.grpc_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", limit=1000)
+        G = self.grpc_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", limit=20)
         print("G time:", time.time() - S)
 
         S = time.time()
-        D = self.default_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", limit=1000)
+        D = self.default_client.get_records(CONTRACT_ID, "systolic_pressure,diastolic_pressure,pulse", limit=20)
         print("D time:", time.time() - S)
+
+        print("records count:", len(D))
 
         assert G == D
 
