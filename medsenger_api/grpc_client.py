@@ -94,6 +94,8 @@ class RecordsClient(object):
             "type": category.type,
             "default_representation": category.default_representation,
             "is_legacy": category.is_legacy,
+            "doctor_can_add": category.doctor_can_add,
+            "doctor_can_replace": category.doctor_can_replace,
             "subcategory": category.subcategory if category.subcategory else None
         }
 
