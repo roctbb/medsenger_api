@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from protocol import records_pb2 as protocol_dot_records__pb2
+from . import records_pb2 as protocol_dot_records__pb2
 
 
 class RecordsStub(object):

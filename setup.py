@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='medsenger_api',
-    version='0.1.54',
+    version='0.1.55',
     description='Python SDK for Medsenger.AI',
     url='https://github.com/roctbb/medsenger_api',
     author='Rostislav Borodin',
