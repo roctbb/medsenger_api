@@ -110,7 +110,7 @@ class RecordsClient(object):
         if category.type == 'integer':
             return int(float(value))
         if category.type == 'float':
-            return float(value)
+            return round(float(value), 3)
         return value
 
     def __present_record(self, record, with_category=False):
