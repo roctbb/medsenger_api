@@ -153,6 +153,9 @@ class AgentApiClient:
     def request_payment(self, contract_id, inv_id, amount, title):
         return self.rest_client.request_payment(contract_id, inv_id, amount, title)
 
+    def get_payments(self, contract_id):
+        return self.rest_client.get_payments(contract_id)
+
     def send_order(self, contract_id, order, receiver_id=None, params=None):
         return self.rest_client.send_order(contract_id, order, receiver_id, params)
 

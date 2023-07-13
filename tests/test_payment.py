@@ -10,4 +10,6 @@ class TestPayment(TestCase):
     def test_request_payment(self):
         print(self.create_client().request_payment(CONTRACT_ID, "test_1", 100, "Test payment"))
 
+    def test_get_all_payments(self):
+        print(self.create_client().get_payments(CONTRACT_ID))
 
