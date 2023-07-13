@@ -334,7 +334,7 @@ class RestApiClient:
             "contract_id": contract_id
         }
 
-        return self.__send_request__('/api/agents/payments', data)
+        return self.__send_request__('/api/agents/payments', data).get('payments')
 
     def send_order(self, contract_id, order, receiver_id=None, params=None):
         data = {
