@@ -64,6 +64,8 @@ class RecordsClient(object):
         self.__debug = debug
         self.channel = None
 
+        self.__create_connection__()
+
     def __find_category_by_id(self, id):
         if not self.__categories_by_id or id not in self.__categories_by_id:
             print("Loading categories")
@@ -138,8 +140,6 @@ class RecordsClient(object):
 
     def __make_request(self, method, *args, timeout=20, tries=1):
 
-        self.__create_connection__()
-
         if self.__debug:
             print(gts(), " GRPC request to {} with params {}".format(method, args))
 
@@ -166,8 +166,6 @@ class RecordsClient(object):
 
                     if self.__debug:
                         print("Retrying request... {}".format(i + 1))
-
-        self.__close_connection__()
 
         print("Request failed!")
         raise GrpcConnectionError("GRPC request error to {} with params {}: {}".format(method, args, exception))
