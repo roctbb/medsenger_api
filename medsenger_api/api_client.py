@@ -192,3 +192,9 @@ class AgentApiClient:
                                  '8000') + "/api/client/agents/{agent_id}/?action={action}&contract_id={contract_id}&agent_token={agent_token}".format(
             agent_id=self.agent_id, action=action, contract_id=contract_id, agent_token=agent_token
         )
+
+    def get_messages(self, contract_id, from_id=0):
+        return self.rest_client.get_messages(contract_id, from_id)
+
+    def notify_admin(self, message, channel="it"):
+        return self.rest_client.notify_admin(message, channel)

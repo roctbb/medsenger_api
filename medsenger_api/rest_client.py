@@ -385,6 +385,19 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/image', data)
 
+    def get_messages(self, contract_id, from_id=0):
+        data = {
+            "api_key": self.api_key,
+            "from_id": from_id,
+            "contract_id": contract_id
+        }
+
+        answer = self.__send_request__('/api/agents/messages', data)
+
+        if answer and isinstance(answer, dict):
+            return answer.get('messages')
+        return []
+
     def update_cache(self, contract_id):
         data = {
             "api_key": self.api_key,
@@ -401,3 +414,12 @@ class RestApiClient:
         }
 
         return self.__send_request__('/api/agents/info_materials/set', data)
+
+    def notify_admin(self, message, channel="it"):
+        data = {
+            "api_key": self.api_key,
+            "message": message,
+            "channel": channel
+        }
+
+        return self.__send_request__('/api/agents/notify_admin', data)

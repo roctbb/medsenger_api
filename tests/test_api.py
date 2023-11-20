@@ -73,3 +73,8 @@ class TestApi(TestCase):
 
         assert client.get_record_by_id(CONTRACT_ID, id) == None
 
+    def test_get_messsages(self):
+        client = self.create_client()
+
+        print(client.get_messages(CONTRACT_ID))
+
