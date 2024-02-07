@@ -186,24 +186,31 @@ class RestApiClient:
 
         for record in values:
             record_params = copy(params)
+            current_record_time = record_time
             files = []
+            custom_params = {}
 
             if isinstance(record, (list, tuple)):
                 if len(record) == 2:
                     category_name, value = record
                 else:
                     category_name, value, custom_params = record
-                    record_params.update(custom_params)
+
             elif isinstance(record, dict):
                 category_name = record['category_name']
                 value = record['value']
                 custom_params = record.get('params', {})
-                record_params.update(custom_params)
                 files = record.get('files', [])
+
+            if "record_time" in custom_params:
+                current_record_time = custom_params['record_time']
+                del custom_params['record_time']
+
+            record_params.update(custom_params)
 
             data['values'].append(
                 {"category_name": category_name, "value": value, "params": record_params, "files": files,
-                 "time": record_time})
+                 "time": current_record_time})
 
         if return_id:
             data['return_id'] = True

@@ -7,6 +7,9 @@ class TestApi(TestCase):
     def create_client(self):
         return AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, True)
 
+    def test_patient_info(self):
+        print(self.create_client().get_patient_info(CONTRACT_ID))
+
     def test_get_categories(self):
         print(self.create_client().get_categories())
 
