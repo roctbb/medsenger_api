@@ -110,9 +110,9 @@ class RecordsClient(object):
 
     def __convert_value(self, value, category):
         if category.type == 'integer':
-            return int(float(value))
+            return int(float(value.replace(',', '.')))
         if category.type == 'float':
-            return round(float(value), 3)
+            return round(float(value.replace(',', '.')), 3)
         return value
 
     def __present_record(self, record, with_category=False):
