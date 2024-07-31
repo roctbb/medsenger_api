@@ -150,12 +150,14 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/records/addition', data)
 
-    def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None, return_id=False):
+    def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None, return_id=False,
+                   replace=False):
         data = {
             "contract_id": contract_id,
             "api_key": self.api_key,
             "category_name": category_name,
             "value": value,
+            "replace": replace
         }
 
         if params:
@@ -185,10 +187,13 @@ class RestApiClient:
         data = {"contract_id": contract_id, "api_key": self.api_key, 'values': []}
 
         for record in values:
+            category_name = None
+            value = None
             record_params = copy(params)
             current_record_time = record_time
             files = []
             custom_params = {}
+            should_replace = False
 
             if isinstance(record, (list, tuple)):
                 if len(record) == 2:
@@ -201,6 +206,7 @@ class RestApiClient:
                 value = record['value']
                 custom_params = record.get('params', {})
                 files = record.get('files', [])
+                should_replace = record.get('replace', False)
 
             if "record_time" in custom_params:
                 current_record_time = custom_params['record_time']
@@ -210,7 +216,7 @@ class RestApiClient:
 
             data['values'].append(
                 {"category_name": category_name, "value": value, "params": record_params, "files": files,
-                 "time": current_record_time})
+                 "time": current_record_time, "replace": should_replace})
 
         if return_id:
             data['return_id'] = True
