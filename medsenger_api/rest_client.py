@@ -183,6 +183,15 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/records/delete', data)
 
+    def set_classifier(self, contract_id, code):
+        data = {
+            "contract_id": contract_id,
+            "api_key": self.api_key,
+            "code": code,
+        }
+
+        return self.__send_request__('/api/agents/classifier', data)
+
     def add_records(self, contract_id, values, record_time=None, params={}, return_id=False):
         data = {"contract_id": contract_id, "api_key": self.api_key, 'values': []}
 

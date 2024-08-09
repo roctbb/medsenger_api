@@ -114,6 +114,9 @@ class AgentApiClient:
     def add_hooks(self, contract_id, names):
         return self.rest_client.add_hooks(contract_id, names)
 
+    def set_classifier(self, contract_id, code):
+        return self.rest_client.set_classifier(contract_id, code)
+
     def remove_hooks(self, contract_id, names):
         return self.rest_client.remove_hooks(contract_id, names)
 

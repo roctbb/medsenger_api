@@ -81,3 +81,8 @@ class TestApi(TestCase):
 
         print(client.get_messages(CONTRACT_ID))
 
+    def test_set_classifier(self):
+        client = self.create_client()
+
+        client.set_classifier(CONTRACT_ID, "unstandart")
+
