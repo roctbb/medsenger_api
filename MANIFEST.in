@@ -1,2 +1,1 @@
 include medsenger_api/protocol/*.py
-include medsenger_api/server.crt

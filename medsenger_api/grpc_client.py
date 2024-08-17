@@ -4,6 +4,7 @@ import grpc
 from .utils import *
 from .protocol import records_pb2_grpc as pb2_grpc
 from .protocol import records_pb2 as pb2
+from .certificates import CERTTIFICATE
 
 
 class RecordsClient(object):
@@ -31,10 +32,7 @@ class RecordsClient(object):
         if self.__debug:
             print("Connecting to GRPC...")
 
-        with open('medsenger_api/server.crt', 'rb') as f:
-            trusted_certs = f.read()
-
-        credentials = grpc.ssl_channel_credentials(root_certificates=trusted_certs)
+        credentials = grpc.ssl_channel_credentials(root_certificates=CERTTIFICATE)
 
         # instantiate a channel
         self.channel = grpc.secure_channel(
