@@ -31,7 +31,7 @@ class RecordsClient(object):
         if self.__debug:
             print("Connecting to GRPC...")
 
-        with open('./server.crt', 'rb') as f:
+        with open('medsenger_api/server.crt', 'rb') as f:
             trusted_certs = f.read()
 
         credentials = grpc.ssl_channel_credentials(root_certificates=trusted_certs)
