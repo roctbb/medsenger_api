@@ -46,6 +46,10 @@ class AgentApiClient:
         self.categories = self.rest_client.get_categories()
         return self.categories
 
+    def reconnect(self):
+        if self.grpc_client:
+            self.grpc_client.reconnect()
+
     def get_available_categories(self, contract_id):
         if self.grpc_client:
             try:
@@ -123,8 +127,10 @@ class AgentApiClient:
     def send_addition(self, contract_id, record_id, addition):
         return self.rest_client.send_addition(contract_id, record_id, addition)
 
-    def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None, return_id=False, replace=False):
-        return self.rest_client.add_record(contract_id, category_name, value, record_time, params, files, return_id, replace)
+    def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None, return_id=False,
+                   replace=False):
+        return self.rest_client.add_record(contract_id, category_name, value, record_time, params, files, return_id,
+                                           replace)
 
     def delete_record(self, contract_id, record_id):
         return self.rest_client.delete_record(contract_id, record_id)

@@ -3,3 +3,4 @@ python-magic
 grpcio
 grpcio-tools
 sentry-sdk
+setuptools

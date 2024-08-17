@@ -50,6 +50,13 @@ class RecordsClient(object):
         if self.__debug:
             print("Connected to GRPC")
 
+    def reconnect(self):
+        self.__create_connection__()
+
+    def __connect_if_should(self):
+        if not self.channel:
+            self.__create_connection__()
+
     def __close_connection__(self):
         self.channel.close()
 
@@ -63,8 +70,6 @@ class RecordsClient(object):
         self.__categories_by_name = {}
         self.__debug = debug
         self.channel = None
-
-        self.__create_connection__()
 
     def __find_category_by_id(self, id):
         if not self.__categories_by_id or id not in self.__categories_by_id:
@@ -139,6 +144,7 @@ class RecordsClient(object):
         return presentation
 
     def __make_request(self, method, *args, timeout=20, tries=1):
+        self.__connect_if_should()
 
         if self.__debug:
             print(gts(), " GRPC request to {} with params {}".format(method, args))
