@@ -31,9 +31,14 @@ class RecordsClient(object):
         if self.__debug:
             print("Connecting to GRPC...")
 
+        with open('./server.crt', 'rb') as f:
+            trusted_certs = f.read()
+
+        credentials = grpc.ssl_channel_credentials(root_certificates=trusted_certs)
+
         # instantiate a channel
-        self.channel = grpc.insecure_channel(
-            '{}:{}'.format(self.host, self.server_port), options=[
+        self.channel = grpc.secure_channel(
+            '{}:{}'.format(self.host, self.server_port), credentials, options=[
                 ('grpc.max_send_message_length', 50 * 1024 * 1024),
                 ('grpc.max_receive_message_length', 50 * 1024 * 1024),
                 ('grpc.keepalive_time_ms', 10000),
