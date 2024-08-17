@@ -26,4 +26,4 @@ ytkSOGA7VgVUNSjGu9Ho+vupqG2VXI1chypJNkfkfb9wGlyYV3ODcRJennDRN1GB
 NxtRGM+Sv4y+7BixASWckrdI+Po/FKSbxqmOUJrE/a8sIRtlaIc+62uEqNh9Q60C
 VBfxqEa73NJAzpJw9XNQja7u
 -----END CERTIFICATE-----
-"""
+""".encode('utf-8')
