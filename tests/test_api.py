@@ -86,3 +86,13 @@ class TestApi(TestCase):
 
         client.set_classifier(CONTRACT_ID, "unstandart")
 
+    def test_set_contract_param(self):
+        client = self.create_client()
+
+        client.set_contract_param(CONTRACT_ID, "param", "value")
+
+    def test_remove_contract_param(self):
+        client = self.create_client()
+
+        client.set_contract_param(CONTRACT_ID, "param", "")
+

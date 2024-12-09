@@ -437,6 +437,16 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/info_materials/set', data)
 
+    def set_contract_param(self, contract_id, name, value):
+        data = {
+            "api_key": self.api_key,
+            "contract_id": contract_id,
+            "name": name,
+            "value": value
+        }
+
+        return self.__send_request__('/api/agents/set_contract_param', data)
+
     def notify_admin(self, message, channel="it"):
         data = {
             "api_key": self.api_key,

@@ -195,6 +195,9 @@ class AgentApiClient:
     def set_info_materials(self, contract_id, materials):
         return self.rest_client.set_info_materials(contract_id, materials)
 
+    def set_contract_param(self, contract_id, name, value):
+        return self.rest_client.set_contract_param(contract_id, name, value)
+
     def ajax_url(self, action, contract_id, agent_token):
         # TODO fix
         return self.host.replace('8001',
