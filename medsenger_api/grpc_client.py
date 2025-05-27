@@ -280,7 +280,7 @@ class RecordsClient(object):
         for i in range(len(queries)):
             category_name = queries[i]['category_name']
             full_list = not category_name or ',' in category_name or queries[i]['inner_list']
-            answers.extend(self.__present_record_query_answer(result.answers[i], category_name, full_list))
+            answers.extend(self.__present_record_query_answer(result.answers[i], category_name, full_list)[0])
 
         return answers
 
