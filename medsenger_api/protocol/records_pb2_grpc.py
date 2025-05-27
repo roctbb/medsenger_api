@@ -39,6 +39,11 @@ class RecordsStub(object):
                 request_serializer=protocol_dot_records__pb2.RecordQuery.SerializeToString,
                 response_deserializer=protocol_dot_records__pb2.RecordList.FromString,
                 )
+        self.GetMultipleRecords = channel.unary_unary(
+                '/records.Records/GetMultipleRecords',
+                request_serializer=protocol_dot_records__pb2.MultiRecordQuery.SerializeToString,
+                response_deserializer=protocol_dot_records__pb2.MultiRecordAnswer.FromString,
+                )
         self.CountRecords = channel.unary_unary(
                 '/records.Records/CountRecords',
                 request_serializer=protocol_dot_records__pb2.RecordQuery.SerializeToString,
@@ -79,6 +84,12 @@ class RecordsServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetMultipleRecords(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def CountRecords(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -112,6 +123,11 @@ def add_RecordsServicer_to_server(servicer, server):
                     servicer.GetRecords,
                     request_deserializer=protocol_dot_records__pb2.RecordQuery.FromString,
                     response_serializer=protocol_dot_records__pb2.RecordList.SerializeToString,
+            ),
+            'GetMultipleRecords': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMultipleRecords,
+                    request_deserializer=protocol_dot_records__pb2.MultiRecordQuery.FromString,
+                    response_serializer=protocol_dot_records__pb2.MultiRecordAnswer.SerializeToString,
             ),
             'CountRecords': grpc.unary_unary_rpc_method_handler(
                     servicer.CountRecords,
@@ -210,6 +226,23 @@ class Records(object):
         return grpc.experimental.unary_unary(request, target, '/records.Records/GetRecords',
             protocol_dot_records__pb2.RecordQuery.SerializeToString,
             protocol_dot_records__pb2.RecordList.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetMultipleRecords(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/records.Records/GetMultipleRecords',
+            protocol_dot_records__pb2.MultiRecordQuery.SerializeToString,
+            protocol_dot_records__pb2.MultiRecordAnswer.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

@@ -2,12 +2,17 @@ import time
 from .utils import gts
 from .grpc_client import RecordsClient
 from .rest_client import RestApiClient
-import sentry_sdk
+
+try:
+    import sentry_sdk
+except:
+    pass
 
 
 class AgentApiClient:
     def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False, use_grpc=False,
                  grpc_host=None, sentry_dsn=None):
+
         self.rest_client = RestApiClient(api_key, host, agent_id, debug)
         self.grpc_client = None
         self.user_cache = {}
@@ -81,21 +86,44 @@ class AgentApiClient:
     def get_clinics_info(self):
         return self.rest_client.get_clinics_info()
 
+    def __prepare_query_for_grpc(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None,
+                                 offset=None,
+                                 group=False, inner_list=False, user_id=None):
+
+        print("Preparing q for gprc request in api client:", (contract_id, category_name, time_from, time_to, limit, offset, group, inner_list, user_id))
+        if contract_id not in self.user_cache and not user_id:
+            self.get_patient_info(contract_id)
+
+        if not user_id:
+            user_id = self.user_cache[contract_id]
+
+        return dict(user_id=user_id, category_name=category_name, time_from=time_from, time_to=time_to, offset=offset, limit=limit, group=group, inner_list=inner_list)
+
+    def get_multiple_records(self, queries):
+        if self.grpc_client:
+            try:
+                prepared_queries = [self.__prepare_query_for_grpc(**query) for query in queries]
+                return self.grpc_client.get_multiple_records(prepared_queries)
+            except Exception as e:
+                if self.dsn:
+                    sentry_sdk.capture_exception(e)
+                print(gts(), "GRPC for multiple records failed with error:", e)
+
+        return [self.get_records(**query) for query in queries]
+
     def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
-                    group=False, return_count=False, inner_list=False):
+                    group=False, return_count=False, inner_list=False, user_id=None):
 
         if self.grpc_client:
             try:
-                if contract_id not in self.user_cache:
-                    self.get_patient_info(contract_id)
-
                 if return_count:
                     method = self.grpc_client.count_records
                 else:
                     method = self.grpc_client.get_records
 
-                return method(self.user_cache[contract_id], category_name, time_from, time_to, offset, limit, group,
-                              inner_list)
+                return method(
+                    **self.__prepare_query_for_grpc(contract_id, category_name, time_from, time_to, limit, offset, group,
+                                                   inner_list, user_id))
             except Exception as e:
                 if self.dsn:
                     sentry_sdk.capture_exception(e)

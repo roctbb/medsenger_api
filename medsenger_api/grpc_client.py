@@ -19,6 +19,8 @@ class RecordsClient(object):
             return stub.GetRecords
         elif method == 'CountRecords':
             return stub.CountRecords
+        elif method == 'GetMultipleRecords':
+            return stub.GetMultipleRecords
         else:
             return None
 
@@ -210,11 +212,7 @@ class RecordsClient(object):
         else:
             return None
 
-    def __aggregate_records(self, method, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()),
-                            offset=0,
-                            limit=None, group=False, inner_list=False):
-        full_list = not category_name or ',' in category_name or inner_list
-
+    def __prepare_record_query(self, user_id, category_name, time_from, time_to, offset, limit, group, inner_list=False):
         category_names = category_name.split(',')
         category_ids = self.__find_ids_for_categories(category_names)
 
@@ -224,11 +222,11 @@ class RecordsClient(object):
 
             return None, 0
 
-        if from_timestamp is not None:
-            from_timestamp = int(from_timestamp)
+        if time_from is not None:
+            time_from = int(time_from)
 
-        if to_timestamp is not None:
-            to_timestamp = int(to_timestamp)
+        if time_to is not None:
+            time_to = int(time_to)
 
         if offset is not None:
             offset = int(offset)
@@ -236,38 +234,61 @@ class RecordsClient(object):
         if limit is not None:
             limit = int(limit)
 
-        request = pb2.RecordQuery(user_id=user_id, category_ids=category_ids, from_timestamp=from_timestamp,
-                                  to_timestamp=to_timestamp, offset=offset, limit=limit, with_group=group)
+        return pb2.RecordQuery(user_id=user_id, category_ids=category_ids, from_timestamp=time_from,
+                                  to_timestamp=time_to, offset=offset, limit=limit, with_group=group)
 
-        result = self.__make_request(method, request)
+    def __present_record_query_answer(self, answer, category_name, full_list=False):
         records = None
-
         if full_list:
-            if result.records:
-                records = [self.__present_record(record, with_category=True) for record in result.records]
+            if answer.records:
+                records = [self.__present_record(record, with_category=True) for record in answer.records]
         else:
-            if result.records:
+            if answer.records:
                 records = {
                     "category": self.__present_category(self.__categories_by_name.get(category_name)),
-                    "values": [self.__present_record(record, with_category=False) for record in result.records]
+                    "values": [self.__present_record(record, with_category=False) for record in answer.records]
                 }
 
-        return records, result.count
+        return records, answer.count
 
-    @safe
-    def get_records(self, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()), offset=0,
+
+    def __aggregate_records(self, method, user_id, category_name, time_from=0, time_to=int(time.time()),
+                            offset=0,
+                            limit=None, group=False, inner_list=False):
+        full_list = not category_name or ',' in category_name or inner_list
+
+        request = self.__prepare_record_query(user_id, category_name, time_from, time_to, offset, limit, group)
+        result = self.__make_request(method, request)
+
+        return self.__present_record_query_answer(result, category_name, full_list)
+
+
+
+    def get_records(self, user_id, category_name, time_from=0, time_to=int(time.time()), offset=0,
                     limit=None, group=False, inner_list=False):
-        records, count = self.__aggregate_records('GetRecords', user_id, category_name, from_timestamp,
-                                                  to_timestamp,
+        records, count = self.__aggregate_records('GetRecords', user_id, category_name, time_from,
+                                                  time_to,
                                                   offset, limit, group, inner_list)
         return records
 
-    @safe
-    def count_records(self, user_id, category_name, from_timestamp=0, to_timestamp=int(time.time()), offset=0,
+    def get_multiple_records(self, queries):
+        prepared_queries = [self.__prepare_record_query(**query) for query in queries]
+        request = pb2.MultiRecordQuery(queries=prepared_queries)
+
+        result = self.__make_request('GetMultipleRecords', request)
+        answers = []
+        for i in range(len(queries)):
+            category_name = queries[i]['category_name']
+            full_list = not category_name or ',' in category_name or queries[i]['inner_list']
+            answers.extend(self.__present_record_query_answer(result.answers[i], category_name, full_list))
+
+        return answers
+
+    def count_records(self, user_id, category_name, time_from=0, time_to=int(time.time()), offset=0,
                       limit=None, group=False, inner_list=False):
 
-        records, count = self.__aggregate_records('CountRecords', user_id, category_name, from_timestamp,
-                                                  to_timestamp,
+        records, count = self.__aggregate_records('CountRecords', user_id, category_name, time_from,
+                                                  time_to,
                                                   offset, limit, group, inner_list)
 
         return {"count": count}

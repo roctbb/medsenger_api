@@ -88,7 +88,7 @@ class TestApi(TestCase):
 
         assert G == D
 
-    def test_get_records_from_multiple_categroies_with_time(self):
+    def test_get_records_from_multiple_categories_with_time(self):
         T = int(time.time() - 2 * 30 * 24 * 60 * 60)
         F = int(time.time() - 3 * 30 * 24 * 60 * 60)
 
@@ -110,6 +110,17 @@ class TestApi(TestCase):
                     print("b: ", b)
 
         assert G == D
+
+    def test_multiple_get_records(self):
+        T = int(time.time() - 2 * 30 * 24 * 60 * 60)
+        F = int(time.time() - 3 * 30 * 24 * 60 * 60)
+
+        query_1 = dict(contract_id=CONTRACT_ID, category_name="systolic_pressure,diastolic_pressure,pulse")
+        query_2 = dict(contract_id=CONTRACT_ID, category_name="pulse")
+
+        G = self.grpc_client.get_multiple_records([query_1, query_2])
+
+        print(G)
 
     def test_count_records(self):
         S = time.time()
