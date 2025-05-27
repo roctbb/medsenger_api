@@ -103,7 +103,7 @@ class AgentApiClient:
         if self.grpc_client:
             try:
                 prepared_queries = [self.__prepare_query_for_grpc(**query) for query in queries]
-                return self.grpc_client.get_multiple_records(prepared_queries)
+                return self.grpc_client.get_multiple_records(prepared_queries)[0]
             except Exception as e:
                 if self.dsn:
                     sentry_sdk.capture_exception(e)

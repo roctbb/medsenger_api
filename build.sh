@@ -1,3 +1,4 @@
 rm -rf build
 python3 -m build
-python3 -m twine upload --repository pypi dist/*
+twine check dist/*
+twine upload dist/*
