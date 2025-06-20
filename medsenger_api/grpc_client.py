@@ -148,7 +148,7 @@ class RecordsClient(object):
 
         return presentation
 
-    def __make_request(self, method, *args, timeout=20, tries=1):
+    def __make_request(self, method, *args, timeout=20, tries=3):
         self.__connect_if_should()
 
         if self.__debug:
