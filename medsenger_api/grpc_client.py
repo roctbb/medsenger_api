@@ -65,7 +65,7 @@ class RecordsClient(object):
     def __close_connection__(self):
         self.channel.close()
 
-    def __init__(self, debug=False, host=None):
+    def __init__(self, debug=False, host=None, api_key=None):
         if not host:
             host = "medsenger.ru"
 
@@ -75,6 +75,7 @@ class RecordsClient(object):
         self.__categories_by_name = {}
         self.__debug = debug
         self.channel = None
+        self.api_key = api_key
 
     def __find_category_by_id(self, id):
         if not self.__categories_by_id or id not in self.__categories_by_id:
@@ -160,7 +161,7 @@ class RecordsClient(object):
                 F = self.__get_method__(method, self.stub)
 
                 if F:
-                    return F(*args, timeout=timeout)
+                    return F(*args, timeout=timeout, metadata=[('authorization', self.api_key)])
                 else:
                     raise Exception("Wrong method")
             except grpc.RpcError as e:

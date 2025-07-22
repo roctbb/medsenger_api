@@ -24,7 +24,7 @@ class AgentApiClient:
         self.categories_last_request = 0
 
         if use_grpc:
-            self.grpc_client = RecordsClient(host=grpc_host, debug=debug)
+            self.grpc_client = RecordsClient(host=grpc_host, debug=debug, api_key=api_key)
 
         if self.dsn:
             sentry_sdk.init(dsn=self.dsn, traces_sample_rate=1.0)
