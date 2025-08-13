@@ -109,7 +109,8 @@ class RecordsClient(object):
             "is_legacy": category.is_legacy,
             "doctor_can_add": category.doctor_can_add,
             "doctor_can_replace": category.doctor_can_replace,
-            "subcategory": category.subcategory if category.subcategory else None
+            "subcategory": category.subcategory if category.subcategory else None,
+            "locale": category.locale if category.locale else None
         }
 
     def __present_file(self, file):
