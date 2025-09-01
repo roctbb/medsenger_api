@@ -73,6 +73,7 @@ class RecordsClient(object):
         self.server_port = 50051
         self.__categories_by_id = {}
         self.__categories_by_name = {}
+
         self.__debug = debug
         self.channel = None
         self.api_key = api_key
@@ -83,21 +84,47 @@ class RecordsClient(object):
             print("Loading categories")
             self.get_categories()
 
-        return self.__categories_by_id.get(id)
+        categories = self.__categories_by_id.get(id)
+
+        if not categories:
+            return None
+
+        if self.locale:
+            result = [category for category in categories if category.locale == self.locale]
+            if result:
+                return result[0]
+
+        return categories[0]
 
     def __find_category_by_name(self, name):
         if not self.__categories_by_name or name not in self.__categories_by_name:
             print("Loading categories")
             self.get_categories()
 
-        return self.__categories_by_name.get(name)
+        categories = self.__categories_by_name.get(name)
+
+        if not categories:
+            return None
+
+        if self.locale:
+            result = [category for category in categories if category.locale == self.locale]
+            if result:
+                return result[0]
+
+        return categories[0]
 
     def __find_ids_for_categories(self, category_names):
         if not self.__categories_by_name:
             print("Loading categories")
             self.get_categories()
 
-        return [self.__categories_by_name[name].id for name in category_names if name in self.__categories_by_name]
+        result = set()
+
+        for name in category_names:
+            for category in self.__categories_by_name[name]:
+                result.add(category.id)
+
+        return list(result)
 
     def __present_category(self, category):
         return {
@@ -193,12 +220,18 @@ class RecordsClient(object):
         categories = []
 
         for category in result.categories:
-            if self.locale and category.locale != self.locale:
-                continue
-            self.__categories_by_id[category.id] = category
-            self.__categories_by_name[category.name] = category
+            if category.id not in self.__categories_by_id:
+                self.__categories_by_id[category.id] = []
+            if category.name not in self.__categories_by_name:
+                self.__categories_by_name[category.name] = []
+
+            self.__categories_by_id[category.id].append(category)
+            self.__categories_by_name[category.name].append(category)
 
             categories.append(self.__present_category(category))
+
+        if self.locale:
+            categories = [category for category in categories if category['locale'] == self.locale]
 
         return categories
 
@@ -260,7 +293,7 @@ class RecordsClient(object):
         else:
             if answer.records:
                 records = {
-                    "category": self.__present_category(self.__categories_by_name.get(category_name)),
+                    "category": self.__present_category(self.__find_category_by_name(category_name)),
                     "values": [self.__present_record(record, with_category=False) for record in answer.records]
                 }
 
