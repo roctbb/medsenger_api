@@ -182,7 +182,7 @@ class RecordsClient(object):
         self.__connect_if_should()
 
         if self.__debug:
-            print(gts(), " GRPC request to {} with params {}".format(method, args))
+            print(gts(), " GRPC request to {} with params {} and locale {}".format(method, args, self.locale))
 
         exception = None
         for i in range(tries):
@@ -311,6 +311,7 @@ class RecordsClient(object):
 
     def get_records(self, user_id, category_name, time_from=0, time_to=int(time.time()), offset=0,
                     limit=None, group=False, inner_list=False):
+
         records, count = self.__aggregate_records('GetRecords', user_id, category_name, time_from,
                                                   time_to,
                                                   offset, limit, group, inner_list)
