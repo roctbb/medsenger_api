@@ -11,23 +11,30 @@ except:
 
 class AgentApiClient:
     def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False, use_grpc=False,
-                 grpc_host=None, sentry_dsn=None):
+                 grpc_host=None, sentry_dsn=None, locale=None):
 
-        self.rest_client = RestApiClient(api_key, host, agent_id, debug)
+        self.rest_client = RestApiClient(api_key, host, agent_id, debug, locale=locale)
         self.grpc_client = None
         self.user_cache = {}
         self.categories_cache = {}
         self.debug = debug
         self.dsn = sentry_dsn
+        self.locale = locale
 
         self.categories = []
         self.categories_last_request = 0
 
         if use_grpc:
-            self.grpc_client = RecordsClient(host=grpc_host, debug=debug, api_key=api_key)
+            self.grpc_client = RecordsClient(host=grpc_host, debug=debug, api_key=api_key, locale=locale)
 
         if self.dsn:
             sentry_sdk.init(dsn=self.dsn, traces_sample_rate=1.0)
+
+    def set_locale(self, locale):
+        self.locale = locale
+        self.rest_client.locale = locale
+        if self.grpc_client:
+            self.grpc_client.locale = locale
 
     def get_categories(self):
         if self.categories and time.time() - self.categories_last_request < 60:
@@ -49,6 +56,10 @@ class AgentApiClient:
                 print(gts(), "GRPC failed with error:", e)
 
         self.categories = self.rest_client.get_categories()
+
+        if self.locale:
+            self.categories = [category for category in self.categories if category['locale'] == self.locale]
+
         return self.categories
 
     def reconnect(self):
@@ -70,7 +81,12 @@ class AgentApiClient:
                     sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
-        return self.rest_client.get_available_categories(contract_id)
+        categories = self.rest_client.get_available_categories(contract_id)
+
+        if self.locale:
+            categories = [category for category in categories if category['locale'] == self.locale]
+
+        return categories
 
     def get_patient_info(self, contract_id):
         result = self.rest_client.get_patient_info(contract_id)

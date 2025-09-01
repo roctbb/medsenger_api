@@ -65,7 +65,7 @@ class RecordsClient(object):
     def __close_connection__(self):
         self.channel.close()
 
-    def __init__(self, debug=False, host=None, api_key=None):
+    def __init__(self, debug=False, host=None, api_key=None, locale=None):
         if not host:
             host = "medsenger.ru"
 
@@ -76,6 +76,7 @@ class RecordsClient(object):
         self.__debug = debug
         self.channel = None
         self.api_key = api_key
+        self.locale = locale
 
     def __find_category_by_id(self, id):
         if not self.__categories_by_id or id not in self.__categories_by_id:
@@ -189,11 +190,17 @@ class RecordsClient(object):
 
         result = self.__make_request('GetCategoryList', request)
 
+        categories = []
+
         for category in result.categories:
+            if self.locale and category.locale != self.locale:
+                continue
             self.__categories_by_id[category.id] = category
             self.__categories_by_name[category.name] = category
 
-        return [self.__present_category(category) for category in result.categories]
+            categories.append(self.__present_category(category))
+
+        return categories
 
     @safe
     def get_categories_for_user(self, user_id):
@@ -201,7 +208,12 @@ class RecordsClient(object):
 
         result = self.__make_request('GetCategoryListForUser', request)
 
-        return [self.__present_category(category) for category in result.categories]
+        categories = []
+        for category in result.categories:
+            if self.locale and category.locale != self.locale:
+                continue
+            categories.append(self.__present_category(category))
+        return categories
 
     @safe
     def get_record_by_id(self, record_id):
@@ -214,7 +226,8 @@ class RecordsClient(object):
         else:
             return None
 
-    def __prepare_record_query(self, user_id, category_name, time_from, time_to, offset, limit, group, inner_list=False):
+    def __prepare_record_query(self, user_id, category_name, time_from, time_to, offset, limit, group,
+                               inner_list=False):
         category_names = category_name.split(',')
         category_ids = self.__find_ids_for_categories(category_names)
 
@@ -237,7 +250,7 @@ class RecordsClient(object):
             limit = int(limit)
 
         return pb2.RecordQuery(user_id=user_id, category_ids=category_ids, from_timestamp=time_from,
-                                  to_timestamp=time_to, offset=offset, limit=limit, with_group=group)
+                               to_timestamp=time_to, offset=offset, limit=limit, with_group=group)
 
     def __present_record_query_answer(self, answer, category_name, full_list=False):
         records = None
@@ -253,7 +266,6 @@ class RecordsClient(object):
 
         return records, answer.count
 
-
     def __aggregate_records(self, method, user_id, category_name, time_from=0, time_to=int(time.time()),
                             offset=0,
                             limit=None, group=False, inner_list=False):
@@ -263,8 +275,6 @@ class RecordsClient(object):
         result = self.__make_request(method, request)
 
         return self.__present_record_query_answer(result, category_name, full_list)
-
-
 
     def get_records(self, user_id, category_name, time_from=0, time_to=int(time.time()), offset=0,
                     limit=None, group=False, inner_list=False):

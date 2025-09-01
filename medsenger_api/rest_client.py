@@ -4,11 +4,12 @@ from datetime import datetime
 
 
 class RestApiClient:
-    def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False):
+    def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False, locale=None):
         self.host = host
         self.api_key = api_key
         self.debug = debug
         self.agent_id = agent_id
+        self.locale = locale
 
     def __gts__(self):
         now = datetime.now()
@@ -83,6 +84,9 @@ class RestApiClient:
             "contract_id": contract_id,
             "api_key": self.api_key,
         }
+
+        if self.locale:
+            data["locale"] = self.locale
 
         if category_name:
             data["category_name"] = category_name
