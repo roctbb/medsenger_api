@@ -284,6 +284,9 @@ class RecordsClient(object):
 
         category_ids = self.__find_ids_for_categories(category_names)
 
+        if inner_list:
+            category_ids.append(-1)
+
         if category_names and not category_ids:
             if self.__debug:
                 print("Category search failed:", category_names, self.__categories_by_name.keys())
