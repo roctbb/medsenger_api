@@ -327,7 +327,7 @@ class RecordsClient(object):
                             limit=None, group=False, inner_list=False, forced_locale=None):
         full_list = not category_name or ',' in category_name or inner_list
 
-        request = self.__prepare_record_query(user_id, category_name, time_from, time_to, offset, limit, group)
+        request = self.__prepare_record_query(user_id, category_name, time_from, time_to, offset, limit, group, inner_list)
         result = self.__make_request(method, request)
 
         return self.__present_record_query_answer(result, category_name, full_list, forced_locale=forced_locale)
