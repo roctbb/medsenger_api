@@ -78,15 +78,18 @@ class RestApiClient:
         return self.__send_request__('/api/agents/clinics', data) or []
 
     def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
-                    group=False, return_count=False, inner_list=False):
+                    group=False, return_count=False, inner_list=False, forced_locale=None):
 
         data = {
             "contract_id": contract_id,
             "api_key": self.api_key,
         }
 
-        if self.locale:
-            data["locale"] = self.locale
+        if self.locale or forced_locale:
+            locale = forced_locale
+            if not locale:
+                locale = self.locale
+            data["locale"] = locale
 
         if category_name:
             data["category_name"] = category_name

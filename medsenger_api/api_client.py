@@ -36,7 +36,7 @@ class AgentApiClient:
         if self.grpc_client:
             self.grpc_client.locale = locale
 
-    def get_categories(self):
+    def get_categories(self, forced_locale=None):
         if self.categories and time.time() - self.categories_last_request < 60:
             return self.categories
 
@@ -44,12 +44,7 @@ class AgentApiClient:
 
         if self.grpc_client:
             try:
-                self.categories = self.grpc_client.get_categories()
-
-                for category in self.categories:
-                    self.categories_cache[category['name']] = category
-
-                return self.categories
+                return self.grpc_client.get_categories(forced_locale=forced_locale)
             except Exception as e:
                 if self.dsn:
                     sentry_sdk.capture_exception(e)
@@ -57,8 +52,11 @@ class AgentApiClient:
 
         self.categories = self.rest_client.get_categories()
 
-        if self.locale:
-            self.categories = [category for category in self.categories if category['locale'] == self.locale]
+        if self.locale or forced_locale:
+            locale = forced_locale
+            if not locale:
+                locale = self.locale
+            self.categories = [category for category in self.categories if category['locale'] == locale]
 
         return self.categories
 
@@ -66,14 +64,14 @@ class AgentApiClient:
         if self.grpc_client:
             self.grpc_client.reconnect()
 
-    def get_available_categories(self, contract_id):
+    def get_available_categories(self, contract_id, forced_locale=None):
         if self.grpc_client:
             try:
                 if contract_id not in self.user_cache:
                     self.get_patient_info(contract_id)
 
                 if contract_id in self.user_cache:
-                    return self.grpc_client.get_categories_for_user(self.user_cache[contract_id])
+                    return self.grpc_client.get_categories_for_user(self.user_cache[contract_id], forced_locale=forced_locale)
 
                 return []
             except Exception as e:
@@ -83,8 +81,11 @@ class AgentApiClient:
 
         categories = self.rest_client.get_available_categories(contract_id)
 
-        if self.locale:
-            categories = [category for category in categories if category['locale'] == self.locale]
+        if self.locale or forced_locale:
+            locale = forced_locale
+            if not locale:
+                locale = self.locale
+            categories = [category for category in categories if category['locale'] == locale]
 
         return categories
 
@@ -103,17 +104,16 @@ class AgentApiClient:
         return self.rest_client.get_clinics_info()
 
     def __prepare_query_for_grpc(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None,
-                                 offset=None,
-                                 group=False, inner_list=False, user_id=None):
+                                 offset=None, group=False, inner_list=False, user_id=None, forced_locale=None):
 
-        print("Preparing q for gprc request in api client:", (contract_id, category_name, time_from, time_to, limit, offset, group, inner_list, user_id))
+        print("Preparing q for gprc request in api client:", (contract_id, category_name, time_from, time_to, limit, offset, group, inner_list, user_id, forced_locale))
         if contract_id not in self.user_cache and not user_id:
             self.get_patient_info(contract_id)
 
         if not user_id:
             user_id = self.user_cache[contract_id]
 
-        return dict(user_id=user_id, category_name=category_name, time_from=time_from, time_to=time_to, offset=offset, limit=limit, group=group, inner_list=inner_list)
+        return dict(user_id=user_id, category_name=category_name, time_from=time_from, time_to=time_to, offset=offset, limit=limit, group=group, inner_list=inner_list, forced_locale=forced_locale)
 
     def get_multiple_records(self, queries):
         if self.grpc_client:
@@ -128,7 +128,7 @@ class AgentApiClient:
         return [self.get_records(**query) for query in queries]
 
     def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
-                    group=False, return_count=False, inner_list=False, user_id=None):
+                    group=False, return_count=False, inner_list=False, user_id=None, forced_locale=None):
 
         if self.grpc_client:
             try:
@@ -139,19 +139,19 @@ class AgentApiClient:
 
                 return method(
                     **self.__prepare_query_for_grpc(contract_id, category_name, time_from, time_to, limit, offset, group,
-                                                   inner_list, user_id))
+                                                    inner_list, user_id, forced_locale))
             except Exception as e:
                 if self.dsn:
                     sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
         return self.rest_client.get_records(contract_id, category_name, time_from, time_to, limit, offset, group,
-                                            return_count, inner_list)
+                                            return_count, inner_list, forced_locale)
 
-    def get_record_by_id(self, contract_id, record_id):
+    def get_record_by_id(self, contract_id, record_id, forced_locale=None):
         if self.grpc_client:
             try:
-                return self.grpc_client.get_record_by_id(record_id)
+                return self.grpc_client.get_record_by_id(record_id, forced_locale=forced_locale)
             except Exception as e:
                 if self.dsn:
                     sentry_sdk.capture_exception(e)

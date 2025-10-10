@@ -79,7 +79,7 @@ class RecordsClient(object):
         self.api_key = api_key
         self.locale = locale
 
-    def __find_category_by_id(self, id):
+    def __find_category_by_id(self, id, forced_locale=None):
         if not self.__categories_by_id or id not in self.__categories_by_id:
             print("Loading categories")
             self.get_categories()
@@ -89,14 +89,18 @@ class RecordsClient(object):
         if not categories:
             return None
 
-        if self.locale:
-            result = [category for category in categories if category.locale == self.locale]
+        if self.locale or forced_locale:
+            locale = forced_locale
+            if not locale:
+                locale = self.locale
+
+            result = [category for category in categories if category.locale == locale]
             if result:
                 return result[0]
 
         return categories[0]
 
-    def __find_category_by_name(self, name):
+    def __find_category_by_name(self, name, forced_locale=None):
         if not self.__categories_by_name or name not in self.__categories_by_name:
             print("Loading categories")
             self.get_categories()
@@ -106,8 +110,12 @@ class RecordsClient(object):
         if not categories:
             return None
 
-        if self.locale:
-            result = [category for category in categories if category.locale == self.locale]
+        if self.locale or forced_locale:
+            locale = forced_locale
+            if not locale:
+                locale = self.locale
+
+            result = [category for category in categories if category.locale == locale]
             if result:
                 return result[0]
 
@@ -157,8 +165,8 @@ class RecordsClient(object):
             return round(float(value.replace(',', '.')), 3)
         return value
 
-    def __present_record(self, record, with_category=False):
-        category = self.__find_category_by_id(record.category_id)
+    def __present_record(self, record, with_category=False, forced_locale=None):
+        category = self.__find_category_by_id(record.category_id, forced_locale)
 
         presentation = {
             "id": record.id,
@@ -214,7 +222,7 @@ class RecordsClient(object):
         raise GrpcConnectionError("GRPC request error to {} with params {}: {}".format(method, args, exception))
 
     @safe
-    def get_categories(self):
+    def get_categories(self, forced_locale=None):
         request = pb2.Empty()
 
         result = self.__make_request('GetCategoryList', request)
@@ -232,32 +240,41 @@ class RecordsClient(object):
 
             categories.append(self.__present_category(category))
 
-        if self.locale:
-            categories = [category for category in categories if category['locale'] == self.locale]
+        if self.locale or forced_locale:
+            locale = forced_locale
+            if not locale:
+                locale = self.locale
+
+            print("Filtering categories by locale:", locale)
+            categories = [category for category in categories if category['locale'] == locale]
 
         return categories
 
     @safe
-    def get_categories_for_user(self, user_id):
+    def get_categories_for_user(self, user_id, forced_locale=None):
+        locale = forced_locale
+        if not locale and self.locale:
+            locale = self.locale
+
         request = pb2.User(id=user_id)
 
         result = self.__make_request('GetCategoryListForUser', request)
 
         categories = []
         for category in result.categories:
-            if self.locale and category.locale != self.locale:
+            if locale and category.locale != locale:
                 continue
             categories.append(self.__present_category(category))
         return categories
 
     @safe
-    def get_record_by_id(self, record_id):
+    def get_record_by_id(self, record_id, forced_locale=None):
         request = pb2.RecordRequest(id=record_id)
 
         record = self.__make_request('GetRecordById', request)
 
         if record:
-            return self.__present_record(record)
+            return self.__present_record(record, forced_locale=forced_locale)
         else:
             return None
 
@@ -288,36 +305,36 @@ class RecordsClient(object):
         return pb2.RecordQuery(user_id=user_id, category_ids=category_ids, from_timestamp=time_from,
                                to_timestamp=time_to, offset=offset, limit=limit, with_group=group)
 
-    def __present_record_query_answer(self, answer, category_name, full_list=False):
+    def __present_record_query_answer(self, answer, category_name, full_list=False, forced_locale=None):
         records = None
         if full_list:
             if answer.records:
-                records = [self.__present_record(record, with_category=True) for record in answer.records]
+                records = [self.__present_record(record, with_category=True, forced_locale=forced_locale) for record in answer.records]
         else:
             if answer.records:
                 records = {
-                    "category": self.__present_category(self.__find_category_by_name(category_name)),
-                    "values": [self.__present_record(record, with_category=False) for record in answer.records]
+                    "category": self.__present_category(self.__find_category_by_name(category_name, forced_locale)),
+                    "values": [self.__present_record(record, with_category=False, forced_locale=forced_locale) for record in answer.records]
                 }
 
         return records, answer.count
 
     def __aggregate_records(self, method, user_id, category_name, time_from=0, time_to=int(time.time()),
                             offset=0,
-                            limit=None, group=False, inner_list=False):
+                            limit=None, group=False, inner_list=False, forced_locale=None):
         full_list = not category_name or ',' in category_name or inner_list
 
         request = self.__prepare_record_query(user_id, category_name, time_from, time_to, offset, limit, group)
         result = self.__make_request(method, request)
 
-        return self.__present_record_query_answer(result, category_name, full_list)
+        return self.__present_record_query_answer(result, category_name, full_list, forced_locale=forced_locale)
 
     def get_records(self, user_id, category_name, time_from=0, time_to=int(time.time()), offset=0,
-                    limit=None, group=False, inner_list=False):
+                    limit=None, group=False, inner_list=False, forced_locale=None):
 
         records, count = self.__aggregate_records('GetRecords', user_id, category_name, time_from,
                                                   time_to,
-                                                  offset, limit, group, inner_list)
+                                                  offset, limit, group, inner_list, forced_locale=forced_locale)
         return records
 
     def get_multiple_records(self, queries):
@@ -328,16 +345,18 @@ class RecordsClient(object):
         answers = []
         for i in range(len(queries)):
             category_name = queries[i]['category_name']
-            full_list = not category_name or ',' in category_name or queries[i]['inner_list']
-            answers.append(self.__present_record_query_answer(result.answers[i], category_name, full_list)[0])
+            full_list = not category_name or ',' in category_name or queries[i].get('inner_list', False)
+            forced_locale = queries[i].get('forced_locale', None)
+            records, count = self.__present_record_query_answer(result.answers[i], category_name, full_list, forced_locale=forced_locale)
+            answers.append(records)
 
         return answers
 
     def count_records(self, user_id, category_name, time_from=0, time_to=int(time.time()), offset=0,
-                      limit=None, group=False, inner_list=False):
+                      limit=None, group=False, inner_list=False, forced_locale=None):
 
         records, count = self.__aggregate_records('CountRecords', user_id, category_name, time_from,
                                                   time_to,
-                                                  offset, limit, group, inner_list)
+                                                  offset, limit, group, inner_list, forced_locale=forced_locale)
 
         return {"count": count}
