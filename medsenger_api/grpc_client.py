@@ -279,7 +279,7 @@ class RecordsClient(object):
             return None
 
     def __prepare_record_query(self, user_id, category_name, time_from, time_to, offset, limit, group,
-                               inner_list=False):
+                               inner_list=False, forced_locale=None):
         category_names = [category_name.strip() for category_name in category_name.split(',') if category_name]
 
         category_ids = self.__find_ids_for_categories(category_names)
