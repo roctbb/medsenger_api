@@ -335,6 +335,7 @@ class RecordsClient(object):
         records, count = self.__aggregate_records('GetRecords', user_id, category_name, time_from,
                                                   time_to,
                                                   offset, limit, group, inner_list, forced_locale=forced_locale)
+        print(records, count)
         return records
 
     def get_multiple_records(self, queries, forced_locale=None):
