@@ -115,17 +115,17 @@ class AgentApiClient:
 
         return dict(user_id=user_id, category_name=category_name, time_from=time_from, time_to=time_to, offset=offset, limit=limit, group=group, inner_list=inner_list, forced_locale=forced_locale)
 
-    def get_multiple_records(self, queries):
+    def get_multiple_records(self, queries, forced_locale=None):
         if self.grpc_client:
             try:
                 prepared_queries = [self.__prepare_query_for_grpc(**query) for query in queries]
-                return self.grpc_client.get_multiple_records(prepared_queries)
+                return self.grpc_client.get_multiple_records(prepared_queries, forced_locale=forced_locale)
             except Exception as e:
                 if self.dsn:
                     sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC for multiple records failed with error:", e)
 
-        return [self.get_records(**query) for query in queries]
+        return [self.get_records(**query, forced_locale=forced_locale) for query in queries]
 
     def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
                     group=False, return_count=False, inner_list=False, user_id=None, forced_locale=None):

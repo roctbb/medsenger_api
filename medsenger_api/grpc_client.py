@@ -337,7 +337,7 @@ class RecordsClient(object):
                                                   offset, limit, group, inner_list, forced_locale=forced_locale)
         return records
 
-    def get_multiple_records(self, queries):
+    def get_multiple_records(self, queries, forced_locale=None):
         prepared_queries = [self.__prepare_record_query(**query) for query in queries]
         request = pb2.MultiRecordQuery(queries=prepared_queries)
 
@@ -346,7 +346,6 @@ class RecordsClient(object):
         for i in range(len(queries)):
             category_name = queries[i]['category_name']
             full_list = not category_name or ',' in category_name or queries[i].get('inner_list', False)
-            forced_locale = queries[i].get('forced_locale', None)
             records, count = self.__present_record_query_answer(result.answers[i], category_name, full_list, forced_locale=forced_locale)
             answers.append(records)
 
