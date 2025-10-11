@@ -106,7 +106,7 @@ class AgentApiClient:
     def __prepare_query_for_grpc(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None,
                                  offset=None, group=False, inner_list=False, user_id=None):
 
-        print("Preparing q for gprc request in api client:", (contract_id, category_name, time_from, time_to, limit, offset, group, inner_list, user_id))
+        # print("Preparing q for gprc request in api client:", (contract_id, category_name, time_from, time_to, limit, offset, group, inner_list, user_id))
         if contract_id not in self.user_cache and not user_id:
             self.get_patient_info(contract_id)
 
