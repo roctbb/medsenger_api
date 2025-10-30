@@ -254,3 +254,7 @@ class AgentApiClient:
 
     def notify_admin(self, message, channel="it"):
         return self.rest_client.notify_admin(message, channel)
+
+    def get_admin_clinic_info(self, admin_token):
+        return self.rest_client.get_admin_clinic_info(admin_token)
+

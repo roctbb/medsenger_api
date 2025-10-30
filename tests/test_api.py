@@ -96,3 +96,8 @@ class TestApi(TestCase):
 
         client.set_contract_param(CONTRACT_ID, "param", "")
 
+    def test_get_admin_clinic_info(self):
+        client = self.create_client()
+
+        print(client.get_admin_clinic_info(ADMIN_TOKEN))
+
