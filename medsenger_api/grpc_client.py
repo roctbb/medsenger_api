@@ -46,7 +46,8 @@ class RecordsClient(object):
                 ('grpc.keepalive_permit_without_calls', True),
                 ('grpc.http2.max_pings_without_data', 0),
                 ('grpc.http2.min_time_between_pings_ms', 10000),
-                ('grpc.http2.min_ping_interval_without_data_ms', 5000)
+                ('grpc.http2.min_ping_interval_without_data_ms', 5000),
+                ('grpc.ssl_target_name_override', 'medsenger.ru')
             ])
 
         # bind the client and the server
