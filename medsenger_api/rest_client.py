@@ -469,8 +469,4 @@ class RestApiClient:
             "agent_token": admin_token
         }
 
-        answer = self.__send_request__('/api/agents/admin/clinic_info', data)
-
-        if answer and isinstance(answer, dict):
-            return answer.get('messages')
-        return []
+        return self.__send_request__('/api/agents/admin/clinic_info', data)
