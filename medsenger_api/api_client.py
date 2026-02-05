@@ -212,9 +212,6 @@ class AgentApiClient:
     def send_order(self, contract_id, order, receiver_id=None, params=None):
         return self.rest_client.send_order(contract_id, order, receiver_id, params)
 
-    def get_agent_token(self, contract_id):
-        return self.rest_client.get_agent_token(contract_id)
-
     def download_file(self, *args, **kwargs):
         return self.get_file(*args, **kwargs)
 

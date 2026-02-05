@@ -380,14 +380,6 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/order', data)
 
-    def get_agent_token(self, contract_id):
-        data = {
-            "api_key": self.api_key,
-            "contract_id": contract_id
-        }
-
-        return self.__send_request__('/api/agents/token', data)
-
     def get_file(self, contract_id, file_id):
         data = {
             "api_key": self.api_key,
