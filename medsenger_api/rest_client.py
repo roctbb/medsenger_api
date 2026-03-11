@@ -389,6 +389,16 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/records/file', data)
 
+    def get_file_link(self, file_id, hours=2, is_one_time=True):
+        data = {
+            "api_key": self.api_key,
+            "file_id": file_id,
+            "hours": hours,
+            "is_one_time": is_one_time
+        }
+
+        return self.__send_request__('/api/agents/records/file/link', data)
+
     def get_attachment(self, attachment_id):
         data = {
             "api_key": self.api_key,

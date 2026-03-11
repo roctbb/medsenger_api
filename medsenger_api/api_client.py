@@ -224,6 +224,9 @@ class AgentApiClient:
     def get_file(self, contract_id, file_id):
         return self.rest_client.get_file(contract_id, file_id)
 
+    def get_file_link(self, file_id, hours=2, is_one_time=True):
+        return self.rest_client.get_file_link(file_id, hours, is_one_time)
+
     def get_attachment(self, attachment_id):
         return self.rest_client.get_attachment(attachment_id)
 
