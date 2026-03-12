@@ -158,7 +158,7 @@ class RestApiClient:
         return self.__send_request__('/api/agents/records/addition', data)
 
     def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None, return_id=False,
-                   replace=False):
+                   replace=False, sync_files=False):
         data = {
             "contract_id": contract_id,
             "api_key": self.api_key,
@@ -178,6 +178,9 @@ class RestApiClient:
 
         if return_id:
             data['return_id'] = True
+
+        if sync_files:
+            data['sync_files'] = True
 
         return self.__send_request__('/api/agents/records/add', data)
 
