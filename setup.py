@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='medsenger_api',
-    version='0.1.99',
+    version='0.1.100',
     description='Python SDK for Medsenger.AI',
     long_description=long_description,
     long_description_content_type='text/markdown',
