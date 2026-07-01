@@ -8,6 +8,10 @@ class AgentTokenError(Exception):
     pass
 
 
+class GrpcConnectionError(Exception):
+    pass
+
+
 def prepare_binary(name, data):
     import magic
     type = magic.from_buffer(data, mime=True)

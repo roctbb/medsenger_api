@@ -127,6 +127,13 @@ class RecordsClient(object):
             print("Loading categories")
             self.get_categories()
 
+        missing_categories = [name for name in category_names if name not in self.__categories_by_name]
+        if missing_categories:
+            if self.__debug:
+                print("Reloading categories after search miss:", missing_categories)
+
+            self.get_categories(force_reload=True)
+
         result = set()
 
         for name in category_names:
@@ -223,23 +230,28 @@ class RecordsClient(object):
         raise GrpcConnectionError("GRPC request error to {} with params {}: {}".format(method, args, exception))
 
     @safe
-    def get_categories(self, forced_locale=None):
+    def get_categories(self, forced_locale=None, force_reload=False):
         request = pb2.Empty()
 
         result = self.__make_request('GetCategoryList', request)
 
         categories = []
+        categories_by_id = {}
+        categories_by_name = {}
 
         for category in result.categories:
-            if category.id not in self.__categories_by_id:
-                self.__categories_by_id[category.id] = []
-            if category.name not in self.__categories_by_name:
-                self.__categories_by_name[category.name] = []
+            if category.id not in categories_by_id:
+                categories_by_id[category.id] = []
+            if category.name not in categories_by_name:
+                categories_by_name[category.name] = []
 
-            self.__categories_by_id[category.id].append(category)
-            self.__categories_by_name[category.name].append(category)
+            categories_by_id[category.id].append(category)
+            categories_by_name[category.name].append(category)
 
             categories.append(self.__present_category(category))
+
+        self.__categories_by_id = categories_by_id
+        self.__categories_by_name = categories_by_name
 
         if self.locale or forced_locale:
             locale = forced_locale
@@ -292,7 +304,7 @@ class RecordsClient(object):
             if self.__debug:
                 print("Category search failed:", category_names, self.__categories_by_name.keys())
 
-            return None, 0
+            raise GrpcConnectionError("Categories not found: {}".format(', '.join(category_names)))
 
         if time_from is not None:
             time_from = int(time_from)
