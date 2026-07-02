@@ -78,6 +78,19 @@ class RestApiClient:
             'birthday': ''
         }
 
+    def get_doctor_info(self, doctor_id):
+        data = {
+            "api_key": self.api_key,
+            "doctor_id": doctor_id
+        }
+
+        return self.__send_request__('/api/agents/doctor/info', data) or {
+            'state': 'error',
+            'doctor': None,
+            'contracts': [],
+            'doctor_contracts': {}
+        }
+
     def get_clinics_info(self):
         data = {
             "api_key": self.api_key,
