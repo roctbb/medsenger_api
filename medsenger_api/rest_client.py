@@ -50,19 +50,27 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/records/categories', data) or []
 
-    def get_available_categories(self, contract_id):
+    def get_available_categories(self, contract_id=None, user_id=None):
         data = {
-            "contract_id": contract_id,
             "api_key": self.api_key,
         }
+
+        if user_id:
+            data["user_id"] = user_id
+        else:
+            data["contract_id"] = contract_id
 
         return self.__send_request__('/api/agents/records/available_categories', data) or []
 
-    def get_patient_info(self, contract_id):
+    def get_patient_info(self, contract_id=None, user_id=None):
         data = {
-            "contract_id": contract_id,
             "api_key": self.api_key,
         }
+
+        if user_id:
+            data["user_id"] = user_id
+        else:
+            data["contract_id"] = contract_id
 
         return self.__send_request__('/api/agents/patient/info', data) or {
             'name': '',
@@ -77,13 +85,17 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/clinics', data) or []
 
-    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
-                    group=False, return_count=False, inner_list=False, forced_locale=None):
+    def get_records(self, contract_id=None, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
+                    group=False, return_count=False, inner_list=False, forced_locale=None, user_id=None):
 
         data = {
-            "contract_id": contract_id,
             "api_key": self.api_key,
         }
+
+        if user_id:
+            data["user_id"] = user_id
+        else:
+            data["contract_id"] = contract_id
 
         if self.locale or forced_locale:
             locale = forced_locale
@@ -119,13 +131,17 @@ class RestApiClient:
 
         return self.__send_request__(url, data) or None
 
-    def get_record_by_id(self, contract_id, record_id):
+    def get_record_by_id(self, contract_id=None, record_id=None, user_id=None):
 
         data = {
-            "contract_id": contract_id,
             "record_id": record_id,
             "api_key": self.api_key,
         }
+
+        if user_id:
+            data["user_id"] = user_id
+        else:
+            data["contract_id"] = contract_id
 
         return self.__send_request__("/api/agents/records/get", data) or None
 
@@ -383,22 +399,31 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/order', data)
 
-    def get_file(self, contract_id, file_id):
+    def get_file(self, contract_id=None, file_id=None, user_id=None):
         data = {
             "api_key": self.api_key,
             "file_id": file_id,
-            "contract_id": contract_id
         }
+
+        if user_id:
+            data["user_id"] = user_id
+        else:
+            data["contract_id"] = contract_id
 
         return self.__send_request__('/api/agents/records/file', data)
 
-    def get_file_link(self, file_id, hours=2, is_one_time=True):
+    def get_file_link(self, file_id, hours=2, is_one_time=True, contract_id=None, user_id=None):
         data = {
             "api_key": self.api_key,
             "file_id": file_id,
             "hours": hours,
             "is_one_time": is_one_time
         }
+
+        if user_id:
+            data["user_id"] = user_id
+        elif contract_id:
+            data["contract_id"] = contract_id
 
         return self.__send_request__('/api/agents/records/file/link', data)
 

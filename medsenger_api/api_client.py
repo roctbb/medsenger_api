@@ -64,9 +64,12 @@ class AgentApiClient:
         if self.grpc_client:
             self.grpc_client.reconnect()
 
-    def get_available_categories(self, contract_id, forced_locale=None):
+    def get_available_categories(self, contract_id=None, forced_locale=None, user_id=None):
         if self.grpc_client:
             try:
+                if user_id:
+                    return self.grpc_client.get_categories_for_user(user_id, forced_locale=forced_locale)
+
                 if contract_id not in self.user_cache:
                     self.get_patient_info(contract_id)
 
@@ -79,7 +82,7 @@ class AgentApiClient:
                     sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
-        categories = self.rest_client.get_available_categories(contract_id)
+        categories = self.rest_client.get_available_categories(contract_id, user_id=user_id)
 
         if self.locale or forced_locale:
             locale = forced_locale
@@ -89,13 +92,13 @@ class AgentApiClient:
 
         return categories
 
-    def get_patient_info(self, contract_id):
-        result = self.rest_client.get_patient_info(contract_id)
+    def get_patient_info(self, contract_id=None, user_id=None):
+        result = self.rest_client.get_patient_info(contract_id, user_id=user_id)
 
         if self.debug:
             print(result)
 
-        if result.get('id'):
+        if result.get('id') and contract_id:
             self.user_cache[contract_id] = result.get('id')
 
         return result
@@ -103,7 +106,7 @@ class AgentApiClient:
     def get_clinics_info(self):
         return self.rest_client.get_clinics_info()
 
-    def __prepare_query_for_grpc(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None,
+    def __prepare_query_for_grpc(self, contract_id=None, category_name=None, time_from=None, time_to=None, limit=None,
                                  offset=None, group=False, inner_list=False, user_id=None):
 
         # print("Preparing q for gprc request in api client:", (contract_id, category_name, time_from, time_to, limit, offset, group, inner_list, user_id))
@@ -125,9 +128,9 @@ class AgentApiClient:
                     sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC for multiple records failed with error:", e)
 
-        return [self.get_records(**query, forced_locale=forced_locale) for query in queries]
+        return [self.get_records(forced_locale=forced_locale, **query) for query in queries]
 
-    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
+    def get_records(self, contract_id=None, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
                     group=False, return_count=False, inner_list=False, user_id=None, forced_locale=None):
 
         if self.grpc_client:
@@ -146,9 +149,9 @@ class AgentApiClient:
                 print(gts(), "GRPC failed with error:", e)
 
         return self.rest_client.get_records(contract_id, category_name, time_from, time_to, limit, offset, group,
-                                            return_count, inner_list, forced_locale)
+                                            return_count, inner_list, forced_locale, user_id=user_id)
 
-    def get_record_by_id(self, contract_id, record_id, forced_locale=None):
+    def get_record_by_id(self, contract_id=None, record_id=None, forced_locale=None, user_id=None):
         if self.grpc_client:
             try:
                 return self.grpc_client.get_record_by_id(record_id, forced_locale=forced_locale)
@@ -157,7 +160,7 @@ class AgentApiClient:
                     sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
-        return self.rest_client.get_record_by_id(contract_id, record_id)
+        return self.rest_client.get_record_by_id(contract_id, record_id, user_id=user_id)
 
     def add_hooks(self, contract_id, names):
         return self.rest_client.add_hooks(contract_id, names)
@@ -221,11 +224,11 @@ class AgentApiClient:
     def download_image(self, *args, **kwargs):
         return self.get_image(*args, **kwargs)
 
-    def get_file(self, contract_id, file_id):
-        return self.rest_client.get_file(contract_id, file_id)
+    def get_file(self, contract_id=None, file_id=None, user_id=None):
+        return self.rest_client.get_file(contract_id, file_id, user_id=user_id)
 
-    def get_file_link(self, file_id, hours=2, is_one_time=True):
-        return self.rest_client.get_file_link(file_id, hours, is_one_time)
+    def get_file_link(self, file_id, hours=2, is_one_time=True, contract_id=None, user_id=None):
+        return self.rest_client.get_file_link(file_id, hours, is_one_time, contract_id=contract_id, user_id=user_id)
 
     def get_attachment(self, attachment_id):
         return self.rest_client.get_attachment(attachment_id)
@@ -257,4 +260,3 @@ class AgentApiClient:
 
     def get_admin_clinic_info(self, clinic_id):
         return self.rest_client.get_admin_clinic_info(clinic_id)
-

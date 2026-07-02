@@ -89,7 +89,7 @@ def decode_agent_token(token, api_key):
         return None
 
 
-def validate_agent_token(token, api_key):
+def validate_agent_token(token, api_key, include_payload=False):
     """
     Валидирует JWT токен агента и возвращает contract_id и роли.
     
@@ -126,4 +126,7 @@ def validate_agent_token(token, api_key):
     if not roles:
         raise AgentTokenError("No roles in token")
     
+    if include_payload:
+        return payload.get('contract_id'), roles, payload
+
     return payload.get('contract_id'), roles
