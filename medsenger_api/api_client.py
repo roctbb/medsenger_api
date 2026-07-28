@@ -11,9 +11,16 @@ except:
 
 class AgentApiClient:
     def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False, use_grpc=False,
-                 grpc_host=None, sentry_dsn=None, locale=None):
+                 grpc_host=None, sentry_dsn=None, locale=None, request_timeout=30):
 
-        self.rest_client = RestApiClient(api_key, host, agent_id, debug, locale=locale)
+        self.rest_client = RestApiClient(
+            api_key,
+            host,
+            agent_id,
+            debug,
+            locale=locale,
+            request_timeout=request_timeout,
+        )
         self.grpc_client = None
         self.user_cache = {}
         self.categories_cache = {}
@@ -113,6 +120,9 @@ class AgentApiClient:
 
     def get_clinics_info(self):
         return self.rest_client.get_clinics_info()
+
+    def rotate_agent_token(self, current_token):
+        return self.rest_client.rotate_agent_token(current_token)
 
     def __prepare_query_for_grpc(self, contract_id=None, category_name=None, time_from=None, time_to=None, limit=None,
                                  offset=None, group=False, inner_list=False, user_id=None):

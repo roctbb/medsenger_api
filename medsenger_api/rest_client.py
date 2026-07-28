@@ -2,14 +2,25 @@ from copy import copy
 import requests
 from datetime import datetime
 
+from .utils import AgentApiRequestError
+
 
 class RestApiClient:
-    def __init__(self, api_key, host="https://medsenger.ru", agent_id=None, debug=False, locale=None):
+    def __init__(
+        self,
+        api_key,
+        host="https://medsenger.ru",
+        agent_id=None,
+        debug=False,
+        locale=None,
+        request_timeout=30,
+    ):
         self.host = host
         self.api_key = api_key
         self.debug = debug
         self.agent_id = agent_id
         self.locale = locale
+        self.request_timeout = request_timeout
 
     def __gts__(self):
         now = datetime.now()
@@ -42,6 +53,63 @@ class RestApiClient:
         except Exception as e:
             print(self.__gts__(), "Error in {} - {}".format(target, e))
             return None
+
+    def __send_request_strict__(self, page, json_params):
+        """Send a request without collapsing HTTP and transport errors into None."""
+        target = self.host + page
+
+        try:
+            result = requests.post(
+                target,
+                json=json_params,
+                timeout=self.request_timeout,
+            )
+        except requests.RequestException as error:
+            raise AgentApiRequestError(
+                "Request to {} failed: {}".format(target, error)
+            ) from error
+
+        try:
+            response_body = result.json()
+        except ValueError:
+            response_body = result.text
+
+        if not 200 <= result.status_code < 300:
+            error_message = None
+            if isinstance(response_body, dict):
+                error_message = response_body.get('error') or response_body.get('message')
+            elif response_body:
+                error_message = response_body
+
+            message = "API request to {} failed with status {}".format(target, result.status_code)
+            if error_message:
+                message += ": {}".format(error_message)
+
+            raise AgentApiRequestError(
+                message,
+                status_code=result.status_code,
+                response_body=response_body,
+            )
+
+        return response_body
+
+    def rotate_agent_token(self, current_token):
+        data = {
+            "api_key": self.api_key,
+            "agent_token": current_token,
+        }
+
+        response = self.__send_request_strict__('/api/agents/access-token/rotate', data)
+        rotation_data = response.get('data') if isinstance(response, dict) else None
+
+        if not isinstance(rotation_data, dict) or not rotation_data.get('agent_token'):
+            raise AgentApiRequestError(
+                "Invalid response from agent token rotation endpoint",
+                status_code=200,
+                response_body=response,
+            )
+
+        return rotation_data
 
     def get_categories(self):
         data = {
