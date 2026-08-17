@@ -446,6 +446,61 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/tasks/add', data)
 
+    def create_compliance_event(self, contract_id, external_id, code):
+        data = {
+            "api_key": self.api_key,
+            "contract_id": contract_id,
+            "external_id": external_id,
+            "code": code,
+        }
+
+        return self.__send_request_strict__('/api/agents/compliance/events', data)
+
+    def complete_compliance_event(self, contract_id, event_id=None, external_id=None):
+        data = self.__compliance_event_selector__(contract_id, event_id, external_id)
+        return self.__send_request_strict__('/api/agents/compliance/events/complete', data)
+
+    def cancel_compliance_event(self, contract_id, event_id=None, external_id=None):
+        data = self.__compliance_event_selector__(contract_id, event_id, external_id)
+        return self.__send_request_strict__('/api/agents/compliance/events/cancel', data)
+
+    def get_compliance_events(self, date_from, date_to, contract_id=None, user_id=None, limit=None, offset=None):
+        if (contract_id is None) == (user_id is None):
+            raise ValueError('Exactly one of contract_id or user_id is required')
+
+        data = {
+            "api_key": self.api_key,
+            "date_from": date_from,
+            "date_to": date_to,
+        }
+
+        if contract_id is not None:
+            data['contract_id'] = contract_id
+        else:
+            data['user_id'] = user_id
+
+        if limit is not None:
+            data['limit'] = limit
+        if offset is not None:
+            data['offset'] = offset
+
+        return self.__send_request_strict__('/api/agents/compliance/events/get', data)
+
+    def __compliance_event_selector__(self, contract_id, event_id, external_id):
+        if (event_id is None) == (external_id is None):
+            raise ValueError('Exactly one of event_id or external_id is required')
+
+        data = {
+            "api_key": self.api_key,
+            "contract_id": contract_id,
+        }
+        if event_id is not None:
+            data['id'] = event_id
+        else:
+            data['external_id'] = external_id
+
+        return data
+
     def request_payment(self, contract_id, inv_id, amount, title):
         data = {
             "api_key": self.api_key,

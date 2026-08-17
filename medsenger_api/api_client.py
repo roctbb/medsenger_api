@@ -224,6 +224,25 @@ class AgentApiClient:
     def add_task(self, contract_id, text, target_number=1, date=None, important=False, action_link=None):
         return self.rest_client.add_task(contract_id, text, target_number, date, important, action_link)
 
+    def create_compliance_event(self, contract_id, external_id, code):
+        return self.rest_client.create_compliance_event(contract_id, external_id, code)
+
+    def complete_compliance_event(self, contract_id, event_id=None, external_id=None):
+        return self.rest_client.complete_compliance_event(contract_id, event_id, external_id)
+
+    def cancel_compliance_event(self, contract_id, event_id=None, external_id=None):
+        return self.rest_client.cancel_compliance_event(contract_id, event_id, external_id)
+
+    def get_compliance_events(self, date_from, date_to, contract_id=None, user_id=None, limit=None, offset=None):
+        return self.rest_client.get_compliance_events(
+            date_from,
+            date_to,
+            contract_id=contract_id,
+            user_id=user_id,
+            limit=limit,
+            offset=offset,
+        )
+
     def request_payment(self, contract_id, inv_id, amount, title):
         return self.rest_client.request_payment(contract_id, inv_id, amount, title)
 
