@@ -574,7 +574,7 @@ class RestApiClient:
     def get_image(self, image_id, size):
         data = {
             "api_key": self.api_key,
-            "attachment_id": image_id,
+            "image_id": image_id,
             "size": size
         }
 
