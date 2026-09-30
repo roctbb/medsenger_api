@@ -118,10 +118,13 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/records/categories', data) or []
 
-    def get_available_categories(self, contract_id=None, user_id=None):
+    def get_available_categories(self, contract_id=None, user_id=None, record_contract_id=None):
         data = {
             "api_key": self.api_key,
         }
+
+        if record_contract_id is not None:
+            data['record_contract_id'] = record_contract_id
 
         if user_id:
             data["user_id"] = user_id
@@ -167,11 +170,14 @@ class RestApiClient:
         return self.__send_request__('/api/agents/clinics', data) or []
 
     def get_records(self, contract_id=None, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
-                    group=False, return_count=False, inner_list=False, forced_locale=None, user_id=None):
+                    group=False, return_count=False, inner_list=False, forced_locale=None, user_id=None, record_contract_id=None):
 
         data = {
             "api_key": self.api_key,
         }
+
+        if record_contract_id is not None:
+            data['record_contract_id'] = record_contract_id
 
         if user_id:
             data["user_id"] = user_id

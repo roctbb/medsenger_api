@@ -71,17 +71,17 @@ class AgentApiClient:
         if self.grpc_client:
             self.grpc_client.reconnect()
 
-    def get_available_categories(self, contract_id=None, forced_locale=None, user_id=None):
+    def get_available_categories(self, contract_id=None, forced_locale=None, user_id=None, record_contract_id=None):
         if self.grpc_client:
             try:
                 if user_id:
-                    return self.grpc_client.get_categories_for_user(user_id, forced_locale=forced_locale)
+                    return self.grpc_client.get_categories_for_user(user_id, forced_locale=forced_locale, record_contract_id=record_contract_id)
 
                 if contract_id not in self.user_cache:
                     self.get_patient_info(contract_id)
 
                 if contract_id in self.user_cache:
-                    return self.grpc_client.get_categories_for_user(self.user_cache[contract_id], forced_locale=forced_locale)
+                    return self.grpc_client.get_categories_for_user(self.user_cache[contract_id], forced_locale=forced_locale, record_contract_id=record_contract_id)
 
                 return []
             except Exception as e:
@@ -89,7 +89,7 @@ class AgentApiClient:
                     sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
-        categories = self.rest_client.get_available_categories(contract_id, user_id=user_id)
+        categories = self.rest_client.get_available_categories(contract_id, user_id=user_id, record_contract_id=record_contract_id)
 
         if self.locale or forced_locale:
             locale = forced_locale
@@ -125,7 +125,7 @@ class AgentApiClient:
         return self.rest_client.rotate_agent_token(current_token)
 
     def __prepare_query_for_grpc(self, contract_id=None, category_name=None, time_from=None, time_to=None, limit=None,
-                                 offset=None, group=False, inner_list=False, user_id=None):
+                                 offset=None, group=False, inner_list=False, user_id=None, record_contract_id=None):
 
         # print("Preparing q for gprc request in api client:", (contract_id, category_name, time_from, time_to, limit, offset, group, inner_list, user_id))
         if contract_id not in self.user_cache and not user_id:
@@ -134,7 +134,7 @@ class AgentApiClient:
         if not user_id:
             user_id = self.user_cache[contract_id]
 
-        return dict(user_id=user_id, category_name=category_name, time_from=time_from, time_to=time_to, offset=offset, limit=limit, group=group, inner_list=inner_list)
+        return dict(user_id=user_id, category_name=category_name, time_from=time_from, time_to=time_to, offset=offset, limit=limit, group=group, inner_list=inner_list, record_contract_id=record_contract_id)
 
     def get_multiple_records(self, queries, forced_locale=None):
         if self.grpc_client:
@@ -149,7 +149,7 @@ class AgentApiClient:
         return [self.get_records(forced_locale=forced_locale, **query) for query in queries]
 
     def get_records(self, contract_id=None, category_name=None, time_from=None, time_to=None, limit=None, offset=None,
-                    group=False, return_count=False, inner_list=False, user_id=None, forced_locale=None):
+                    group=False, return_count=False, inner_list=False, user_id=None, forced_locale=None, record_contract_id=None):
 
         if self.grpc_client:
             try:
@@ -160,14 +160,14 @@ class AgentApiClient:
 
                 return method(
                     **self.__prepare_query_for_grpc(contract_id, category_name, time_from, time_to, limit, offset, group,
-                                                    inner_list, user_id), forced_locale=forced_locale)
+                                                    inner_list, user_id, record_contract_id), forced_locale=forced_locale)
             except Exception as e:
                 if self.dsn:
                     sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
         return self.rest_client.get_records(contract_id, category_name, time_from, time_to, limit, offset, group,
-                                            return_count, inner_list, forced_locale, user_id=user_id)
+                                            return_count, inner_list, forced_locale, user_id=user_id, record_contract_id=record_contract_id)
 
     def get_record_by_id(self, contract_id=None, record_id=None, forced_locale=None, user_id=None):
         if self.grpc_client:

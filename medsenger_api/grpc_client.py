@@ -178,6 +178,7 @@ class RecordsClient(object):
 
         presentation = {
             "id": record.id,
+            "contract_id": record.contract_id if record.HasField("contract_id") else None,
             "value": self.__convert_value(record.value, category),
             "timestamp": record.created_at,
             "uploaded": record.updated_at,
@@ -264,12 +265,12 @@ class RecordsClient(object):
         return categories
 
     @safe
-    def get_categories_for_user(self, user_id, forced_locale=None):
+    def get_categories_for_user(self, user_id, forced_locale=None, record_contract_id=None):
         locale = forced_locale
         if not locale and self.locale:
             locale = self.locale
 
-        request = pb2.User(id=user_id)
+        request = pb2.User(id=user_id, record_contract_id=record_contract_id)
 
         result = self.__make_request('GetCategoryListForUser', request)
 
@@ -292,8 +293,8 @@ class RecordsClient(object):
             return None
 
     def __prepare_record_query(self, user_id, category_name, time_from, time_to, offset, limit, group,
-                               inner_list=False, forced_locale=None):
-        category_names = [category_name.strip() for category_name in category_name.split(',') if category_name]
+                               inner_list=False, forced_locale=None, record_contract_id=None):
+        category_names = [name.strip() for name in (category_name or '').split(',') if name.strip()]
 
         category_ids = self.__find_ids_for_categories(category_names)
 
@@ -319,7 +320,7 @@ class RecordsClient(object):
             limit = int(limit)
 
         return pb2.RecordQuery(user_id=user_id, category_ids=category_ids, from_timestamp=time_from,
-                               to_timestamp=time_to, offset=offset, limit=limit, with_group=group)
+                               to_timestamp=time_to, offset=offset, limit=limit, with_group=group, record_contract_id=record_contract_id)
 
     def __present_record_query_answer(self, answer, category_name, full_list=False, forced_locale=None):
         records = None
@@ -337,20 +338,20 @@ class RecordsClient(object):
 
     def __aggregate_records(self, method, user_id, category_name, time_from=0, time_to=int(time.time()),
                             offset=0,
-                            limit=None, group=False, inner_list=False, forced_locale=None):
+                            limit=None, group=False, inner_list=False, forced_locale=None, record_contract_id=None):
         full_list = not category_name or ',' in category_name or inner_list
 
-        request = self.__prepare_record_query(user_id, category_name, time_from, time_to, offset, limit, group, inner_list)
+        request = self.__prepare_record_query(user_id, category_name, time_from, time_to, offset, limit, group, inner_list, record_contract_id=record_contract_id)
         result = self.__make_request(method, request)
 
         return self.__present_record_query_answer(result, category_name, full_list, forced_locale=forced_locale)
 
     def get_records(self, user_id, category_name, time_from=0, time_to=int(time.time()), offset=0,
-                    limit=None, group=False, inner_list=False, forced_locale=None):
+                    limit=None, group=False, inner_list=False, forced_locale=None, record_contract_id=None):
 
         records, count = self.__aggregate_records('GetRecords', user_id, category_name, time_from,
                                                   time_to,
-                                                  offset, limit, group, inner_list, forced_locale=forced_locale)
+                                                  offset, limit, group, inner_list, forced_locale=forced_locale, record_contract_id=record_contract_id)
         # print(records, count)
         return records
 
@@ -369,10 +370,10 @@ class RecordsClient(object):
         return answers
 
     def count_records(self, user_id, category_name, time_from=0, time_to=int(time.time()), offset=0,
-                      limit=None, group=False, inner_list=False, forced_locale=None):
+                      limit=None, group=False, inner_list=False, forced_locale=None, record_contract_id=None):
 
         records, count = self.__aggregate_records('CountRecords', user_id, category_name, time_from,
                                                   time_to,
-                                                  offset, limit, group, inner_list, forced_locale=forced_locale)
+                                                  offset, limit, group, inner_list, forced_locale=forced_locale, record_contract_id=record_contract_id)
 
         return {"count": count}
