@@ -85,3 +85,40 @@ history = api.get_compliance_events(
 Exactly one of `event_id` or `external_id` is required when completing or
 cancelling an event. History queries similarly require exactly one of
 `contract_id` or `user_id`.
+
+
+## Coalesced cache invalidation (0.1.109)
+
+Install `medsenger-api[cache]` (SQLAlchemy 2.x). `CacheUpdateOutbox` is an optional
+adapter: it does not change `/api/agents/cache`, `/params`, `/actions` or socket payloads.
+A pure projection specifies which persisted fields affect an agent's cache.
+Changes to watched models and ORM bulk updates/deletes write one durable pending
+row per `(agent_key, contract_id)` in the SAME transaction. Raw SQL and bulk
+executemany must explicitly record invalidations; they must not silently bypass tracking.
+
+`batch()` groups a request/task containing intermediate commits. PostgreSQL
+shared advisory locks prevent publishing its intermediate state, while an
+exclusive publisher lock prevents two workers from publishing the same revision.
+The publisher does not hold a database transaction during HTTP. A committed
+partial operation remains pending on failure; rolled-back changes disappear.
+A process crash releases its locks. HTTP failures retain the row with bounded
+retry delays; clinical operations are never retried by this component.
+
+Watch only actual dependencies: forms' visible buttons and editable parameter
+values/locations; call booking visibility and visible locale; heart activation and upload-key revision.
+Runtime timers and device settings not present in the response do not invalidate.
+The renderer and projection should share pure code. Preserve array order and
+scalar types; do not include timestamps or freshly issued tokens in projections.
+A fresh token inside an actual backend snapshot must still be compared normally.
+External dependencies (patient profile, category metadata, token rotation) still
+require their existing backend invalidation paths; the agent observer does not
+claim to observe another service's database.
+
+Run one standalone `run_worker(app)` process per agent initially. The fixed 0.5 s
+coalescing window is not extended by additional changes. Requests/tasks for other
+contracts remain independent. Multiple publishers are safe; measure pending age
+and throughput before increasing their number. Keep agent Flask workers available
+for the backend's `/params` and `/actions` callbacks.
+
+Tests: `TEST_POSTGRES_URL=<isolated-test-database> python -m unittest discover -s tests -p 'test_cache_*.py'`.
+The PostgreSQL suite resets its test tables: never use an application database.

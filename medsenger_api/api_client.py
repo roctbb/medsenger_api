@@ -285,6 +285,10 @@ class AgentApiClient:
     def update_cache(self, contract_id):
         return self.rest_client.update_cache(contract_id)
 
+    def update_cache_strict(self, contract_id):
+        """Same cache endpoint, with bounded transport and explicit failures."""
+        return self.rest_client.update_cache_strict(contract_id)
+
     def set_info_materials(self, contract_id, materials):
         return self.rest_client.set_info_materials(contract_id, materials)
 

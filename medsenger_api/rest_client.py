@@ -621,6 +621,11 @@ class RestApiClient:
 
         return self.__send_request__('/api/agents/cache', data)
 
+    def update_cache_strict(self, contract_id):
+        return self.__send_request_strict__('/api/agents/cache', {
+            'api_key': self.api_key, 'contract_id': contract_id,
+        })
+
     def set_info_materials(self, contract_id, materials):
         data = {
             "api_key": self.api_key,

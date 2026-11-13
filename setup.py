@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='medsenger_api',
-    version='0.1.108',
+    version='0.1.109',
     description='Python SDK for Medsenger.AI',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -15,6 +15,7 @@ setup(
     license='BSD 2-clause',
     packages=find_packages(include=['medsenger_api', 'medsenger_api.*']),
     install_requires=['requests', 'python-magic', 'grpcio', 'grpcio-tools', 'sentry-sdk', 'PyJWT'],
+    extras_require={'cache': ['SQLAlchemy>=2.0']},
     package_data={'protocol': ['*']},
     classifiers=[
         'License :: OSI Approved :: BSD License',
