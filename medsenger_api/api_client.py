@@ -118,6 +118,15 @@ class AgentApiClient:
 
         return result
 
+    def get_all_doctor_info(self, doctor_id):
+        """Same format as get_doctor_info(), including completed contracts."""
+        result = self.rest_client.get_all_doctor_info(doctor_id)
+
+        if self.debug:
+            print(result)
+
+        return result
+
     def get_clinics_info(self):
         return self.rest_client.get_clinics_info()
 

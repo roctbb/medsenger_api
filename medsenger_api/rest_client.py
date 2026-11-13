@@ -162,6 +162,20 @@ class RestApiClient:
             'doctor_contracts': {}
         }
 
+    def get_all_doctor_info(self, doctor_id):
+        """Return the doctor's agent-connected contracts, including completed ones."""
+        data = {
+            "api_key": self.api_key,
+            "doctor_id": doctor_id
+        }
+
+        return self.__send_request__('/api/agents/doctor/info/all', data) or {
+            'state': 'error',
+            'doctor': None,
+            'contracts': [],
+            'doctor_contracts': {}
+        }
+
     def get_clinics_info(self):
         data = {
             "api_key": self.api_key,
