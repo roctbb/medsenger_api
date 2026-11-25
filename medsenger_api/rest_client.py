@@ -54,7 +54,7 @@ class RestApiClient:
             print(self.__gts__(), "Error in {} - {}".format(target, e))
             return None
 
-    def __send_request_strict__(self, page, json_params):
+    def __send_request_strict__(self, page, json_params, **options):
         """Send a request without collapsing HTTP and transport errors into None."""
         target = self.host + page
 
@@ -62,6 +62,7 @@ class RestApiClient:
             result = requests.post(
                 target,
                 json=json_params,
+                **options,
                 timeout=self.request_timeout,
             )
         except requests.RequestException as error:
@@ -273,6 +274,11 @@ class RestApiClient:
         }
 
         return self.__send_request__('/api/agents/records/addition', data)
+
+    def add_manual_entry(self, agent_token, entry):
+        return self.__send_request_strict__('/api/agents/records/manual', {
+            'api_key': self.api_key, 'agent_token': agent_token, 'entry': entry
+        }, headers={'Accept': 'application/json'})
 
     def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None, return_id=False,
                    replace=False, sync_files=False):

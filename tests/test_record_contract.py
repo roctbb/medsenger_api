@@ -62,6 +62,23 @@ class RecordContractTest(TestCase):
         self.assertEqual(client.grpc_client.get_categories_for_user.call_args.kwargs['record_contract_id'], 10)
         self.assertEqual(client.rest_client.get_available_categories.call_args.kwargs['record_contract_id'], 10)
 
+    def test_manual_entry_metadata_handles_old_servers_and_decimal_values(self):
+        client = RecordsClient(api_key='key')
+        category = pb2.Category(id=1, name='weight', type='float', locale='ru', doctor_can_add=True)
+        present = client._RecordsClient__present_category
+        self.assertFalse(present(category)['patient_can_add'])
+        self.assertTrue(present(category)['doctor_can_add'])
+        self.assertIsNone(present(category)['default_input_constraints'])
+        category.patient_can_add = True
+        category.default_input_constraints_json = '{"step":0.0001}'
+        self.assertEqual(present(category)['default_input_constraints'], {'step': 0.0001})
+        self.assertTrue(present(category)['patient_can_add'])
+        category.default_input_constraints_json = 'null'
+        self.assertFalse(present(category)['patient_can_add'])
+        client._RecordsClient__categories_by_id = {1: [category]}
+        record = pb2.Record(category_id=1, value='4.5123', params='{"source":"manual"}', additions='null')
+        self.assertEqual(client._RecordsClient__present_record(record)['value'], 4.5123)
+
     def test_grpc_serialization_and_record_presentation(self):
         client = RecordsClient(api_key='key')
         category = pb2.Category(id=1, name='pulse', type='integer', locale='ru')

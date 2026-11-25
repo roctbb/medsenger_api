@@ -30,6 +30,7 @@ class AgentApiClient:
 
         self.categories = []
         self.categories_last_request = 0
+        self._rest_catalogues = {}
 
         if use_grpc:
             self.grpc_client = RecordsClient(host=grpc_host, debug=debug, api_key=api_key, locale=locale)
@@ -44,10 +45,10 @@ class AgentApiClient:
             self.grpc_client.locale = locale
 
     def get_categories(self, forced_locale=None):
-        if self.categories and time.time() - self.categories_last_request < 60:
-            return self.categories
-
-        self.categories_last_request = time.time()
+        locale = forced_locale or self.locale
+        cached = self._rest_catalogues.get(locale)
+        if cached and time.monotonic() - cached[0] < 60:
+            return cached[1]
 
         if self.grpc_client:
             try:
@@ -57,15 +58,14 @@ class AgentApiClient:
                     sentry_sdk.capture_exception(e)
                 print(gts(), "GRPC failed with error:", e)
 
-        self.categories = self.rest_client.get_categories()
+        categories = self.rest_client.get_categories()
 
-        if self.locale or forced_locale:
-            locale = forced_locale
-            if not locale:
-                locale = self.locale
-            self.categories = [category for category in self.categories if category['locale'] == locale]
-
-        return self.categories
+        if locale:
+            categories = [category for category in categories if category['locale'] == locale]
+        self.categories = categories
+        self.categories_last_request = time.time()
+        self._rest_catalogues[locale] = (time.monotonic(), categories)
+        return categories
 
     def reconnect(self):
         if self.grpc_client:
@@ -200,6 +200,9 @@ class AgentApiClient:
 
     def send_addition(self, contract_id, record_id, addition):
         return self.rest_client.send_addition(contract_id, record_id, addition)
+
+    def add_manual_entry(self, agent_token, entry):
+        return self.rest_client.add_manual_entry(agent_token, entry)
 
     def add_record(self, contract_id, category_name, value, record_time=None, params=None, files=None, return_id=False,
                    replace=False, sync_files=False):

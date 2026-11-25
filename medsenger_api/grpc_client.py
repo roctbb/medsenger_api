@@ -145,6 +145,17 @@ class RecordsClient(object):
         return list(result)
 
     def __present_category(self, category):
+        constraints = None
+        doctor_can_add = category.doctor_can_add
+        patient_can_add = category.HasField("patient_can_add") and category.patient_can_add
+        if category.HasField("default_input_constraints_json"):
+            try:
+                constraints = json.loads(category.default_input_constraints_json)
+                if not isinstance(constraints, dict):
+                    raise ValueError("Expected constraints object")
+            except ValueError:
+                constraints = None
+                doctor_can_add = patient_can_add = False
         return {
             "id": category.id,
             "name": category.name,
@@ -153,7 +164,9 @@ class RecordsClient(object):
             "type": category.type,
             "default_representation": category.default_representation,
             "is_legacy": category.is_legacy,
-            "doctor_can_add": category.doctor_can_add,
+            "doctor_can_add": doctor_can_add,
+            "patient_can_add": patient_can_add,
+            "default_input_constraints": constraints,
             "doctor_can_replace": category.doctor_can_replace,
             "subcategory": category.subcategory if category.subcategory else None,
             "locale": category.locale if category.locale else None
@@ -166,20 +179,22 @@ class RecordsClient(object):
             "type": file.type,
         }
 
-    def __convert_value(self, value, category):
+    def __convert_value(self, value, category, manual=False):
         if category.type == 'integer':
             return int(float(value.replace(',', '.')))
         if category.type == 'float':
-            return round(float(value.replace(',', '.')), 3)
+            number = float(value.replace(',', '.'))
+            return number if manual else round(number, 3)
         return value
 
     def __present_record(self, record, with_category=False, forced_locale=None):
         category = self.__find_category_by_id(record.category_id, forced_locale)
 
+        params = json.loads(record.params)
         presentation = {
             "id": record.id,
             "contract_id": record.contract_id if record.HasField("contract_id") else None,
-            "value": self.__convert_value(record.value, category),
+            "value": self.__convert_value(record.value, category, isinstance(params, dict) and params.get("source") == "manual"),
             "timestamp": record.created_at,
             "uploaded": record.updated_at,
             "source": {
@@ -187,7 +202,7 @@ class RecordsClient(object):
                 "name": record.source.name
             },
             "group": record.group if record.group else None,
-            "params": json.loads(record.params),
+            "params": params,
             "additions": json.loads(record.additions),
             "attached_files": [self.__present_file(file) for file in record.attached_files],
         }
